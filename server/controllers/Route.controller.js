@@ -1,0 +1,88 @@
+const User = require("../models/user.model");
+
+const registerUser = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const existinguser = await User.findOne({ email });
+    if (existinguser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const user = new User({ name, email, password });
+    await user.save();
+    res.status(201).json({ message: "User registered successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Registration failed." });
+  }
+};
+
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "User not found." });
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid password." });
+    }
+
+    const accessToken = user.getAccessToken();
+    const refreshToken = user.getRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    const options = {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    };
+    
+    res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .status(200)
+      .json({ message: "Login successful." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Login failed." });
+  }
+};
+
+const logoutUser = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({ message: "No refresh token provided." });
+    }
+
+    // Optional: Clear the refreshToken from DB
+    const user = await User.findOne({ refreshToken });
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
+
+    // Clear cookies
+    res
+      .clearCookie("accessToken", { httpOnly: true, secure: false, sameSite: "lax" })
+      .clearCookie("refreshToken", { httpOnly: true, secure: false, sameSite: "lax" })
+      .status(200)
+      .json({ message: "Logout successful." });
+  } catch (error) {
+    console.error("Logout Error:", error);
+    res.status(500).json({ message: "Logout failed." });
+  }
+};;
+
+module.exports = {
+  registerUser,
+  loginUser,
+  logoutUser,
+};
