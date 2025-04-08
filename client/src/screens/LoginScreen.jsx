@@ -7,7 +7,13 @@ import { useNavigate } from "react-router-dom";
 const LoginScreen = () => {
     const [message, setMessage] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [serverstatus, setServerStatus] = useState("");
+  
+
+  useEffect(() => {
+    checkserverstatus();
+  }, []);
 
   
     const navigate = useNavigate();
@@ -24,7 +30,9 @@ const LoginScreen = () => {
                 { withCredentials: true } // ✅ Ensure cookies are set from backend // this is used to send the credentials during a login
             );
             
-            setMessage(response.data.message);
+          setMessage(response.data.message);
+          navigate("/Dashboard");
+          
         } catch (error) {
             console.error(error);
             setMessage(error.response?.data?.message || "Login failed.");
@@ -32,23 +40,17 @@ const LoginScreen = () => {
         }
     };
   
-    const handleLogout = async () => {
+   
+    const checkserverstatus = async () => {
       try {
-        const response = await axios.post(
-          process.env.REACT_APP_LOGOUT_URI,
-          {},
-          { withCredentials: true } // 👈 this sends cookies like accessToken
-        );
-        setMessage(response.data.message);
+        const response = await axios.get(process.env.REACT_APP_SERVER_CHECK);
+        // console.log(response.data);
+        setServerStatus("🟢 Live Server");
       } catch (error) {
-        console.error(error);
-        setMessage(error.response?.data?.message || "Logout failed.");
+        // console.error(error);
+        setServerStatus("🔴 Down Server");
       }
     };
-
-
-    
-
     return (
       <div
         style={{
@@ -121,6 +123,7 @@ const LoginScreen = () => {
       
             <button
               type="submit"
+              onClick={handlelogin}
               style={{
                 width: "100%",
                 padding: "12px",
@@ -191,33 +194,16 @@ const LoginScreen = () => {
             zIndex: 4,
           }}
         >
-          🟢 Live Auth Server
+          {serverstatus}
+
         </div>
+        
 
 
-        {/* Adding a temporary logout button to check if the cookies are cleared or not */}
-        <button
-          style={{
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            background: "rgba(255, 255, 255, 0.1)",
-            padding: "10px 20px",
-            borderRadius: "10px",
-            color: "#fff",
-            fontSize: "16px",
-            animation: "float 3s ease-in-out infinite",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            backdropFilter: "blur(5px)",
-            zIndex: 4,
-          }}
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        
           
       </div>
     );
 };
 
-export default LoginScreen;
+export default LoginScreen ;

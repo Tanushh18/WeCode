@@ -20,6 +20,25 @@ const userSchema = mongoose.Schema(
     },
     refreshToken: {
       type: String
+    },
+    questions: {
+      type: [
+        {
+          questionId: {
+            type: String, // e.g., question Title or an actual question _id
+            required: true,
+          },
+          revision: {
+            type: Boolean,
+            default: false,
+          },
+          important: {
+            type: Boolean,
+            default: false,
+          },
+        }
+      ],
+      default: [],
     }
   },
   {

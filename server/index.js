@@ -15,11 +15,11 @@ db();
 
 // Middleware
 app.use(
-    cors({
-      origin: "http://localhost:3000", // Replace with your frontend URL
-      credentials: true, // This allows cookies to be sent
-    })
-  );
+  cors({
+    origin: "http://localhost:3000", // Replace with your frontend URL
+    credentials: true, // This allows cookies to be sent
+  })
+);
 app.use(express.json());
 
 // Routes

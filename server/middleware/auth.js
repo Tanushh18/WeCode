@@ -10,7 +10,7 @@ const verifyToken = async (req, res, next) => {
     if (!refreshToken) {
         return res.status(401).json({ message: "Refresh token not found." });
     }
-    console.log(accessToken, refreshToken);
+    // console.log(accessToken, refreshToken);
     
     const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 
