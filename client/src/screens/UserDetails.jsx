@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState , useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { handleLogout } from "../utils/Logout";
@@ -7,7 +7,69 @@ import Navbar from "../Layout1/Navbar";
 
 const UserDetails = () => {
   const [showmenu, setshowmenu] = React.useState(false);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [name , setName] = React.useState("");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [phone, setPhone] = useState("");
+    const [bio, setBio] = useState("");
+    const [goals, setGoals] = useState("");
+    const [github, setGithub] = useState("");
+    const [linkedin, setLinkedin] = useState("");
+    const [message , setMessage] = React.useState("");
+    
+    
+
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+          try {
+            const res = await axios.get(process.env.REACT_APP_USER_PROFILE, {
+              withCredentials: true,
+            });
+      
+            const data = res.data.user; // ✅ Fix here
+            setName(data.name || "");
+            setEmail(data.email || "");
+            setPhone(data.phone || "");
+            setBio(data.bio || "");
+            setGoals(data.goals || "");
+            setGithub(data.github || "");
+            setLinkedin(data.linkedin || "");
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+          }
+        };
+      
+        fetchUserProfile();
+      }, []);
+    
+    const Updateprofile = (e) => {
+        e.preventDefault();
+        axios .post(process.env.REACT_APP_USER_UPDATE_PROFILE, {
+            name,
+            email,
+            password,
+            phone,
+            bio,
+            goals,
+            github,
+            linkedin
+    
+    
+        },
+        {
+            withCredentials: true
+        })
+            
+            
+        .then((res) => {
+            setMessage("Data Updated Successfully");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    };
 
     
   const handleLogoutClick = () => {
@@ -48,16 +110,43 @@ const UserDetails = () => {
   <h2 className="form-title" style={{ textAlign: "center", color: "violet", marginBottom: "25px" }}>
     User Profile
   </h2>
-  <form className="user-form" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-    <input name="name" placeholder="Name" required style={inputStyle} />
-    <input name="email" type="email" placeholder="Email" required style={inputStyle} />
-    <input name="password" type="password" placeholder="Password" required style={inputStyle} />
-    <input name="phone" placeholder="Phone" style={inputStyle} />
-    <textarea name="bio" placeholder="Short bio..." style={inputStyle} />
-    <textarea name="goals" placeholder="What are your goals?" style={inputStyle} />
-    <input name="github" placeholder="GitHub URL" style={inputStyle} />
-    <input name="linkedin" placeholder="LinkedIn URL" style={inputStyle} />
-    <button type="submit" style={buttonStyle}>Update Profile</button>
+              <form className="user-form" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  
+              <input
+  name="name"
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Name"
+  required
+  style={inputStyle}
+/>
+<input
+  name="email"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  placeholder="Email"
+  required
+  style={inputStyle}
+/>
+
+<input
+  name="password"
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Password"
+  required
+  style={inputStyle}
+/>
+                  
+    <input name="phone" placeholder="Phone" style={inputStyle} value={phone} onChange={(e) => setPhone(e.target.value)} />
+    <textarea name="bio" placeholder="Short bio..." style={inputStyle} value ={bio} onChange={(e) => setBio(e.target.value)} />
+    <textarea name="goals" placeholder="What are your goals?" style={inputStyle} value={goals} onChange={(e) => setGoals(e.target.value)} />
+    <input name="github" placeholder="GitHub URL" style={inputStyle} value={github} onChange={(e) => setGithub(e.target.value)}/>
+    <input name="linkedin" placeholder="LinkedIn URL" style={inputStyle} value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+    <button type="submit" onClick={Updateprofile} style={buttonStyle}>Update Profile</button>
+    {message && <p style={{ color: "green" }}>{message}</p>}
   </form>
 </div>
       </Layout>

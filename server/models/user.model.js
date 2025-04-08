@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config(); // ✅ Load env vars properly
 
+
+
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -21,11 +23,34 @@ const userSchema = mongoose.Schema(
     refreshToken: {
       type: String
     },
+
+    // ✅ New fields added below
+    phone: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    goals: {
+      type: String,
+      default: "",
+    },
+    github: {
+      type: String,
+      default: "",
+    },
+    linkedin: {
+      type: String,
+      default: "",
+    },
+
     questions: {
       type: [
         {
           questionId: {
-            type: String, // e.g., question Title or an actual question _id
+            type: String,
             required: true,
           },
           revision: {
@@ -45,6 +70,7 @@ const userSchema = mongoose.Schema(
     timestamps: true
   }
 );
+
 
 // 🔐 Hash password before saving
 userSchema.pre("save", async function (next) {
@@ -84,6 +110,9 @@ userSchema.methods.getRefreshToken = function () {
     { expiresIn: process.env.REFRESH_TOKEN_SECRET_EXPIRE }
   );
 };
+
+
+
 
 
 module.exports = mongoose.model("User", userSchema);

@@ -235,7 +235,7 @@ const Dashboard = () => {
               >
                 Important
               </th>
-              <th
+              {/* <th
                 style={{
                   border: "1px solid #ddd",
                   padding: "8px",
@@ -243,7 +243,7 @@ const Dashboard = () => {
                 }}
               >
                 Action
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody>

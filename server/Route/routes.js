@@ -9,6 +9,10 @@ const {
   updateQuestion,
   fetchquestion,
 } = require("../controllers/Question.controller"); // Import updateQuestion
+const {
+  updateuserprofile,
+  fetchuserprofile,
+} = require("../controllers/profile.controller");
 const { verifyToken } = require("../middleware/auth");
 
 // Define Routes
@@ -19,6 +23,8 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/questions_update", verifyToken, updateQuestion);
 router.get("/fetch_dashboard", verifyToken, fetchquestion);
+router.get("/userprofile", verifyToken, fetchuserprofile);
+router.post("/user_update_profile", verifyToken, updateuserprofile);
 
 router.post("/logout", verifyToken, logoutUser);
 
