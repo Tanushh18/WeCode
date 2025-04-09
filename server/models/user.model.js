@@ -45,6 +45,12 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "",
     },
+    rooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
+      },
+    ],
 
     questions: {
       type: [

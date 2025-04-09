@@ -4,6 +4,7 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import Dashboard from "./screens/Dashboard";
 import UserDetails from "./screens/UserDetails";
+import CustomRoom from "./Rooms/CustomRoom";
 import "./App.css";
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/userdetails" element={<UserDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/room/:roomId" element={<CustomRoom />} />
+        
 
 
         

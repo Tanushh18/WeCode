@@ -13,6 +13,9 @@ const {
   updateuserprofile,
   fetchuserprofile,
 } = require("../controllers/profile.controller");
+
+const { CreateRoom , joinRoom } = require("../controllers/Room.controller");
+
 const { verifyToken } = require("../middleware/auth");
 
 // Define Routes
@@ -25,6 +28,9 @@ router.post("/questions_update", verifyToken, updateQuestion);
 router.get("/fetch_dashboard", verifyToken, fetchquestion);
 router.get("/userprofile", verifyToken, fetchuserprofile);
 router.post("/user_update_profile", verifyToken, updateuserprofile);
+router.get("/create_room", verifyToken, CreateRoom);
+router.post("/join_room", verifyToken, joinRoom);
+
 
 router.post("/logout", verifyToken, logoutUser);
 
