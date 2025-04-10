@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const Room = require("../models/Room.model");
 const User = require("../models/user.model");
+// const { server } = require("socket.io");
 
 // ✅ Create a new room and store it in DB
 const CreateRoom = async (req, res) => {
@@ -55,5 +56,14 @@ const joinRoom = async (req, res) => {
     return res.status(500).json({ message: "Failed to join room", error });
   }
 };
+
+
+// Code editor real time changes
+
+
+
+
+
+
 
 module.exports = { CreateRoom, joinRoom };

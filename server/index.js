@@ -4,9 +4,13 @@ const db = require("./config/db");
 const cors = require("cors");
 const routes = require("./Route/routes");
 const cookieparser = require("cookie-parser");
+const setupSocket = require("./Sockets/socket");
+const http = require("http");
+
 
 // Initialize Express
 const app = express();
+const server = http.createServer(app);
 
 app.use(cookieparser());
 
@@ -25,8 +29,10 @@ app.use(express.json());
 // Routes
 app.use("/", routes);
 
+setupSocket(server);
+
 // Start Server
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

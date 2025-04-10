@@ -36,23 +36,23 @@ const Dashboard = () => {
     fetchExcel();
   }, []);
   // box effects
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes pulseGlow {
-        from {
-          box-shadow: 0 0 15px rgba(138, 43, 226, 0.4), 0 0 30px rgba(138, 43, 226, 0.2);
-        }
-        to {
-          box-shadow: 0 0 500px rgba(138, 43, 226, 0.7), 0 0 60px rgba(138, 43, 226, 0.4);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const style = document.createElement("style");
+  //   style.innerHTML = `
+  //     @keyframes pulseGlow {
+  //       from {
+  //         box-shadow: 0 0 15px rgba(138, 43, 226, 0.4), 0 0 30px rgba(138, 43, 226, 0.2);
+  //       }
+  //       to {
+  //         box-shadow: 0 0 500px rgba(138, 43, 226, 0.7), 0 0 60px rgba(138, 43, 226, 0.4);
+  //       }
+  //     }
+  //   `;
+  //   document.head.appendChild(style);
+  //   return () => {
+  //     document.head.removeChild(style);
+  //   };
+  // }, []);
 
   const handleCreateRoom = () => {
     createroom(navigate);
