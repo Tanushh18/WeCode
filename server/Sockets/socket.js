@@ -20,6 +20,11 @@ const setupSocket = (server) => {
       // Send code to everyone else in the room
       socket.to(roomId).emit("code-change", code);
     });
+    socket.on("send-message", (msg) => {
+      socket.broadcast.emit("receive-message", `Stranger: ${msg}`);
+    });
+  
+    
 
     socket.on("disconnect", () => {
       console.log("❌ User disconnected:", socket.id);

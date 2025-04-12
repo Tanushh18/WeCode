@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
-import quoteList from "../utils/quotes"; // Create a file with motivational quotes
-import { handleLogout } from "../utils/Logout";
-import Layout from "../Layout1/Layout";
-import Navbar from "../Layout1/Navbar"; // we imported because we need to show the menu options and all
-import {createroom , joinroom} from "../Rooms/room.jsx";
+import quoteList from "../utils/quotes.js"; // Create a file with motivational quotes
+import { handleLogout } from "../utils/Logout.js";
+import Layout from "../Layout1/Layout.jsx";
+import Navbar from "../Layout1/Navbar.jsx"; // we imported because we need to show the menu options and all
+import { createroom, joinroom } from "../Rooms/room.jsx";
+import Livechatroom from "../Rooms/livechatroom.jsx";
 
 const Dashboard = () => {
   const [questions, setQuestions] = useState([]);
@@ -137,18 +138,32 @@ const Dashboard = () => {
   //   }
   // };
 
+  const handleLogoutClick = () => {
+    setshowmenu(false); // close the menu before logout
+    handleLogout(navigate);
+  };
+  const handleToggleMenu = () => {
+    setshowmenu(!showmenu);
+  };
 
-      const handleLogoutClick = () => {
-        setshowmenu(false); // close the menu before logout
-        handleLogout(navigate);
-      };
-      const handleToggleMenu = () => {
-        setshowmenu(!showmenu);
-      };
+  const handleNavigateToDashboard = () => {
+    navigate("/dashboard");
+  };
+
+
+  const slugify = (str) => {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+  const handlejoinquestionroom = (title) => {
+    const roomID = slugify(title);
+    navigate(`/questionroom/${roomID}`);
     
-      const handleNavigateToDashboard = () => {
-        navigate("/dashboard");
-      };
+  }
 
   return (
     // <div
@@ -165,77 +180,80 @@ const Dashboard = () => {
     //   }}
     // >
     <Layout>
-      
       <Navbar
-         
-      showMenu={showmenu}
-      onToggleMenu={handleToggleMenu}
-      onLogout={handleLogoutClick}
-      onDashboard={handleNavigateToDashboard}
+        showMenu={showmenu}
+        onToggleMenu={handleToggleMenu}
+        onLogout={handleLogoutClick}
+        onDashboard={handleNavigateToDashboard}
       />
-      <div style={{ display: "flex", justifyContent: "flex-end" , padding: "2px" }}>
-  <button
-    style={{
-      backgroundColor: "#1a1a1a",
-      padding: "10px 20px",
-      color: "white",
-      border: "1px solid violet",
-      borderRadius: "8px",
-      fontWeight: "bold",
-      cursor: "pointer",
-      transition: "0.3s",
-      boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
-    }}
-    onMouseOver={(e) => e.currentTarget.style.boxShadow = "0 0 16px violet"}
-          onMouseOut={(e) => e.currentTarget.style.boxShadow = "0 0 8px rgba(138, 43, 226, 0.3)"}
-    onClick={handleCreateRoom}
-  >
-    Create Room
-  </button>
+      <div
+        style={{ display: "flex", justifyContent: "flex-end", padding: "2px" }}
+      >
+        <button
+          style={{
+            backgroundColor: "#1a1a1a",
+            padding: "10px 20px",
+            color: "white",
+            border: "1px solid violet",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "0.3s",
+            boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
+          }}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.boxShadow = "0 0 16px violet")
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.boxShadow =
+              "0 0 8px rgba(138, 43, 226, 0.3)")
+          }
+          onClick={handleCreateRoom}
+        >
+          Create Room
+        </button>
 
-  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-  <input
-    type="text"
-    placeholder="Enter Room ID"
-    value={joinRoomId}
-    onChange={(e) => setJoinRoomId(e.target.value)}
-    style={{
-      backgroundColor: "#1a1a1a",
-      color: "white",
-      border: "1px solid violet",
-      borderRadius: "8px",
-      padding: "10px",
-      outline: "none",
-    }}
-  />
-  <button
-    style={{
-      backgroundColor: "#1a1a1a",
-      padding: "10px 20px",
-      color: "white",
-      border: "1px solid violet",
-      borderRadius: "8px",
-      fontWeight: "bold",
-      cursor: "pointer",
-      transition: "0.3s",
-      boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
-    }}
-    onClick={handleJoinRoom}
-    onMouseOver={(e) =>
-      (e.currentTarget.style.boxShadow = "0 0 16px violet")
-    }
-    onMouseOut={(e) =>
-      (e.currentTarget.style.boxShadow = "0 0 8px rgba(138, 43, 226, 0.3)")
-    }
-  >
-    Join Room
-  </button>
-</div>
-</div>
-      
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <input
+            type="text"
+            placeholder="Enter Room ID"
+            value={joinRoomId}
+            onChange={(e) => setJoinRoomId(e.target.value)}
+            style={{
+              backgroundColor: "#1a1a1a",
+              color: "white",
+              border: "1px solid violet",
+              borderRadius: "8px",
+              padding: "10px",
+              outline: "none",
+            }}
+          />
+          <button
+            style={{
+              backgroundColor: "#1a1a1a",
+              padding: "10px 20px",
+              color: "white",
+              border: "1px solid violet",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "0.3s",
+              boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
+            }}
+            onClick={handleJoinRoom}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.boxShadow = "0 0 16px violet")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.boxShadow =
+                "0 0 8px rgba(138, 43, 226, 0.3)")
+            }
+          >
+            Join Room
+          </button>
+        </div>
+      </div>
 
-      
-      
       <h1
         style={{
           textAlign: "center",
@@ -309,15 +327,15 @@ const Dashboard = () => {
               >
                 Important
               </th>
-              {/* <th
+              <th
                 style={{
                   border: "1px solid #ddd",
                   padding: "8px",
                   color: "white",
                 }}
               >
-                Action
-              </th> */}
+                Public Room
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -387,20 +405,17 @@ const Dashboard = () => {
                     color: "white",
                   }}
                 >
-                  <button onClick={() => handleJoinRoom(`room-${index + 1}`)}>
-                    Join Room
-                  </button>
+                  <button onClick={() => handlejoinquestionroom(q.Title)}>
+  Join Room
+</button>
+
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      
-
-
-     
-      </Layout>
+    </Layout>
   );
 };
 
