@@ -3,9 +3,10 @@ const { Server } = require("socket.io");
 const setupSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000", // ✅ your frontend origin
-       credentials : true,// Replace with your frontend URL in production
-    },
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"],
+      credentials: true
+    }
   });
 
   io.on("connection", (socket) => {
@@ -17,14 +18,16 @@ const setupSocket = (server) => {
     });
 
     socket.on("code-change", ({ roomId, code }) => {
-      // Send code to everyone else in the room
       socket.to(roomId).emit("code-change", code);
     });
-    socket.on("send-message", (msg) => {
-      socket.broadcast.emit("receive-message", `Stranger: ${msg}`);
+
+    socket.on("send-message", (data) => {
+      socket.broadcast.emit("receive-message", data);
     });
-  
-    
+
+    socket.on("send-audio", (audioBlob) => {
+      socket.broadcast.emit("receive-audio", audioBlob);
+    });
 
     socket.on("disconnect", () => {
       console.log("❌ User disconnected:", socket.id);
