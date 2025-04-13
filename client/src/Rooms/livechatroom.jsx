@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // your server URL
-
-
+const socket = io("http://localhost:2000"); // your server URL
 
 function ChatRoom() {
   const [message, setMessage] = useState("");
@@ -12,7 +10,11 @@ function ChatRoom() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
-const liveAudioRef = useRef(null);
+  const liveAudioRef = useRef(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const [isVideoOn, setIsVideoOn] = useState(false);
+  const peerConnectionRef = useRef(null);
 
   useEffect(() => {
     // Incoming text messages
@@ -28,10 +30,48 @@ const liveAudioRef = useRef(null);
       audio.play();
     });
 
+    socket.on("video-offer", async (offer) => {
+      if (!peerConnectionRef.current) {
+        peerConnectionRef.current = new RTCPeerConnection();
+
+        peerConnectionRef.current.ontrack = (event) => {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        };
+
+        peerConnectionRef.current.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit("ice-candidate", event.candidate);
+          }
+        };
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideoRef.current.srcObject = stream;
+
+      stream.getTracks().forEach(track => {
+        peerConnectionRef.current.addTrack(track, stream);
+      });
+
+      await peerConnectionRef.current.setRemoteDescription(offer);
+      const answer = await peerConnectionRef.current.createAnswer();
+      await peerConnectionRef.current.setLocalDescription(answer);
+      socket.emit("video-answer", answer);
+    });
+
+    socket.on("video-answer", async (answer) => {
+      await peerConnectionRef.current.setRemoteDescription(answer);
+    });
+
+    socket.on("ice-candidate", (candidate) => {
+      peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
     return () => {
       socket.off("receive-message");
       socket.off("receive-audio");
-      
+      socket.off("video-offer");
+      socket.off("video-answer");
+      socket.off("ice-candidate");
     };
   }, []);
 
@@ -109,9 +149,63 @@ const liveAudioRef = useRef(null);
     }
   };
 
+  const toggleVideo = async () => {
+    if (!isVideoOn) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideoRef.current.srcObject = stream;
+
+        peerConnectionRef.current = new RTCPeerConnection();
+
+        stream.getTracks().forEach(track => {
+          peerConnectionRef.current.addTrack(track, stream);
+        });
+
+        peerConnectionRef.current.ontrack = (event) => {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        };
+
+        peerConnectionRef.current.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit("ice-candidate", event.candidate);
+          }
+        };
+
+        const offer = await peerConnectionRef.current.createOffer();
+        await peerConnectionRef.current.setLocalDescription(offer);
+        socket.emit("video-offer", offer);
+
+        setIsVideoOn(true);
+        console.log("🎥 Video stream started.");
+      } catch (err) {
+        console.error("❌ Could not access webcam:", err);
+      }
+    } else {
+      const stream = localVideoRef.current.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        localVideoRef.current.srcObject = null;
+        remoteVideoRef.current.srcObject = null;
+      }
+
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+
+      setIsVideoOn(false);
+      console.log("🎥 Video stream stopped.");
+    }
+  };
+
   return (
     <div style={styles.container}>
       <header style={styles.header}>🎨 Your Chat Room Header</header>
+
+      <div style={styles.videoContainer}>
+        <video ref={localVideoRef} autoPlay muted style={styles.video} />
+        <video ref={remoteVideoRef} autoPlay style={styles.video} />
+      </div>
 
       <div style={styles.chatArea}>
         {messages.map((msg, index) => (
@@ -137,6 +231,15 @@ const liveAudioRef = useRef(null);
           }}
         >
           🎙️
+        </button>
+        <button
+          onClick={toggleVideo}
+          style={{
+            ...styles.videoButton,
+            backgroundColor: isVideoOn ? "#ff4c4c" : "#4CAF50"
+          }}
+        >
+          🎥
         </button>
       </footer>
     </div>
@@ -195,6 +298,24 @@ const styles = {
     cursor: "pointer"
   },
   micButton: {
+    padding: "10px 14px",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer"
+  },
+  videoContainer: {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "center",
+    marginBottom: "10px"
+  },
+  video: {
+    width: "300px",
+    borderRadius: "8px",
+    backgroundColor: "#000"
+  },
+  videoButton: {
     padding: "10px 14px",
     color: "white",
     border: "none",

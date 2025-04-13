@@ -29,6 +29,18 @@ const setupSocket = (server) => {
       socket.broadcast.emit("receive-audio", audioBlob);
     });
 
+    socket.on("video-offer", (offer) => {
+      socket.broadcast.emit("video-offer", offer);
+    });
+
+    socket.on("video-answer", (answer) => {
+      socket.broadcast.emit("video-answer", answer);
+    });
+
+    socket.on("ice-candidate", (candidate) => {
+      socket.broadcast.emit("ice-candidate", candidate);
+    });
+
     socket.on("disconnect", () => {
       console.log("❌ User disconnected:", socket.id);
     });
