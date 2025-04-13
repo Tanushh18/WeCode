@@ -1,209 +1,232 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-// require("dotenv").config();
-
 const LoginScreen = () => {
-    const [message, setMessage] = useState("");
-    const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [serverstatus, setServerStatus] = useState("");
-  
+  const [serverStatus, setServerStatus] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    checkserverstatus();
+    checkServerStatus();
   }, []);
 
-  
-    const navigate = useNavigate();
+  const checkServerStatus = async () => {
+    try {
+      await axios.get(process.env.REACT_APP_SERVER_CHECK);
+      setServerStatus("🟢 Server Live");
+    } catch {
+      setServerStatus("🔴 Server Down");
+    }
+  };
 
-    const navigation = () => {
-        navigate("/register");
-    };
-  
-    const handlelogin = async () => {
-        try {
-            const response = await axios.post(
-                process.env.REACT_APP_LOGIN_URI,
-                { email, password },
-                { withCredentials: true } // ✅ Ensure cookies are set from backend // this is used to send the credentials during a login
-            );
-            
-          setMessage(response.data.message);
-          navigate("/Dashboard");
-          
-        } catch (error) {
-            console.error(error);
-            setMessage(error.response?.data?.message || "Login failed.");
-            
-        }
-    };
-  
-   
-    const checkserverstatus = async () => {
-      try {
-        const response = await axios.get(process.env.REACT_APP_SERVER_CHECK);
-        // console.log(response.data);
-        setServerStatus("🟢 Live Server");
-      } catch (error) {
-        // console.error(error);
-        setServerStatus("🔴 Down Server");
-      }
-    };
-    return (
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post(
+        process.env.REACT_APP_LOGIN_URI,
+        { email, password },
+        { withCredentials: true }
+      );
+      setMessage(response.data.message);
+      navigate("/Dashboard");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Login failed.");
+    }
+  };
+
+  const handleRegister = () => {
+    navigate("/register");
+  };
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#0d1117",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        color: "#ffffff",
+        fontFamily: "Segoe UI, sans-serif",
+      }}
+    >
+      <img
+        src="wecode logo.png"
+        alt="wecode Logo"
+        style={{ width: "50px", marginBottom: "20px" }}
+      />
+
+      <h2 style={{ marginBottom: "20px", fontWeight: "500" }}>
+        Sign in to WeCode
+      </h2>
+
       <div
         style={{
-          minHeight: "100vh",
-          backgroundImage: "linear-gradient(to right, #0f0c29, #1f1b3a, #121212)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          paddingTop: "100px",
+          backgroundColor: "#0d1117",
+          border: "1px solid #30363d",
+          borderRadius: "6px",
+          padding: "20px",
+          width: "300px",
+          textAlign: "left",
         }}
       >
-        <div
-          style={{
-            maxWidth: "400px",
-            margin: "auto",
-            padding: "30px",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            borderRadius: "10px",
-            boxShadow: "0 0 15px rgba(0, 0, 0, 0.3)",
-            textAlign: "center",
-            backdropFilter: "blur(10px)",
-            color: "#fff",
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
           }}
         >
-          <h1
+          <label style={{ fontSize: "14px", fontWeight: "600" }}>
+            Username or email address
+          </label>
+          <input
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             style={{
-              fontSize: "40px",
-              fontWeight: "bold",
-              marginBottom: "30px",
+              width: "100%",
+              padding: "8px",
+              marginTop: "5px",
+              marginBottom: "15px",
+              border: "1px solid #30363d",
+              borderRadius: "6px",
+              backgroundColor: "#0d1117",
+              color: "#c9d1d9",
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Login Screen
-          </h1>
-      
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handlelogin();
+            <label style={{ fontSize: "14px", fontWeight: "600" }}>
+              Password
+            </label>
+            <a
+              href="#"
+              style={{
+                fontSize: "12px",
+                color: "#58a6ff",
+                textDecoration: "none",
+              }}
+            >
+              Forgot password?
+            </a>
+          </div>
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              marginTop: "5px",
+              marginBottom: "15px",
+              border: "1px solid #30363d",
+              borderRadius: "6px",
+              backgroundColor: "#0d1117",
+              color: "#c9d1d9",
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "10px",
+              backgroundColor: "#238636",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              cursor: "pointer",
+              fontWeight: "600",
+              marginTop: "10px",
             }}
           >
-            <input
-              type="text"
-              placeholder="Email Id"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                fontSize: "20px",
-                marginBottom: "20px",
-                borderRadius: "5px",
-                border: "1px solid #aaa",
-              }}
-            />
-      
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                fontSize: "20px",
-                marginBottom: "20px",
-                borderRadius: "5px",
-                border: "1px solid #aaa",
-              }}
-            />
-      
-            <button
-              type="submit"
-              onClick={handlelogin}
-              style={{
-                width: "100%",
-                padding: "12px",
-                fontSize: "18px",
-                borderRadius: "5px",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                marginBottom: "20px",
-                transition: "background-color 0.3s ease",
-              }}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-            >
-              Login
-            </button>
-      
-            <button
-              type="button"
-              onClick={navigation}
-              style={{
-                width: "100%",
-                padding: "12px",
-                fontSize: "18px",
-                borderRadius: "5px",
-                backgroundColor: "#007BFF",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                transition: "background-color 0.3s ease",
-              }}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#0069d9")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#007BFF")}
-            >
-              Register
-            </button>
-          </form>
-          
-          {message && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "10px",
-                backgroundColor: "#ff4d4f",
-                color: "#fff",
-                borderRadius: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              {message}
-            </div>
-          )}
-        </div>
-        <div
+            Sign in
+          </button>
+        </form>
+      </div>
+
+      <div
+        style={{
+          marginTop: "15px",
+          padding: "12px 20px",
+          border: "1px solid #30363d",
+          borderRadius: "6px",
+          backgroundColor: "#0d1117",
+          fontSize: "14px",
+        }}
+      >
+        New to WeCode?{" "}
+        <span
+          onClick={handleRegister}
           style={{
-            position: "absolute",
-            top: "20px",
-            right: "20px",
-            background: "rgba(255, 255, 255, 0.1)",
-            padding: "10px 20px",
-            borderRadius: "10px",
-            color: "#fff",
-            fontSize: "16px",
-            animation: "float 3s ease-in-out infinite",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            backdropFilter: "blur(5px)",
-            zIndex: 4,
+            color: "#58a6ff",
+            cursor: "pointer",
+            fontWeight: "600",
           }}
         >
-          {serverstatus}
-
-        </div>
-        
-
-
-        
-          
+          Create an account.
+        </span>
       </div>
-    );
+
+      {message && (
+        <div
+          style={{
+            marginTop: "20px",
+            color: "#f85149",
+            fontWeight: "bold",
+          }}
+        >
+          {message}
+        </div>
+      )}
+
+      <div
+        style={{
+          marginTop: "40px",
+          fontSize: "12px",
+          color: "#8b949e",
+          display: "flex",
+          gap: "15px",
+        }}
+      >
+        <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          Terms
+        </a>
+        <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          Privacy
+        </a>
+        <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          Security
+        </a>
+        <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          Contact GitHub
+        </a>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10px",
+          right: "10px",
+          fontSize: "13px",
+          color: "#8b949e",
+        }}
+      >
+        {serverStatus}
+      </div>
+    </div>
+  );
 };
 
-export default LoginScreen ;
+export default LoginScreen;
