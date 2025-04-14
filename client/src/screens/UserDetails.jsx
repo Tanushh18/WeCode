@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { handleLogout } from "../utils/Logout";
@@ -7,75 +7,37 @@ import Navbar from "../Layout1/Navbar";
 
 const UserDetails = () => {
   const [showmenu, setshowmenu] = React.useState(false);
-    const navigate = useNavigate();
-    const [name , setName] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
-    const [phone, setPhone] = useState("");
-    const [bio, setBio] = useState("");
-    const [goals, setGoals] = useState("");
-    const [github, setGithub] = useState("");
-    const [linkedin, setLinkedin] = useState("");
-    const [message , setMessage] = React.useState("");
-    
-    
+  const navigate = useNavigate();
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [bio, setBio] = useState("");
+  const [userPosts, setUserPosts] = useState([]);
 
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-          try {
-            const res = await axios.get(process.env.REACT_APP_USER_PROFILE, {
-              withCredentials: true,
-            });
-      
-            const data = res.data.user; // ✅ Fix here
-            setName(data.name || "");
-            setEmail(data.email || "");
-            setPhone(data.phone || "");
-            setBio(data.bio || "");
-            setGoals(data.goals || "");
-            setGithub(data.github || "");
-            setLinkedin(data.linkedin || "");
-          } catch (error) {
-            console.error("Error fetching profile:", error);
-          }
-        };
-      
-        fetchUserProfile();
-      }, []);
-    
-    const Updateprofile = (e) => {
-        e.preventDefault();
-        axios .post(process.env.REACT_APP_USER_UPDATE_PROFILE, {
-            name,
-            email,
-            password,
-            phone,
-            bio,
-            goals,
-            github,
-            linkedin
-    
-    
-        },
-        {
-            withCredentials: true
-        })
-            
-            
-        .then((res) => {
-            setMessage("Data Updated Successfully");
-        })
-        .catch((err) => {
-            console.log(err);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await axios.get(process.env.REACT_APP_USER_PROFILE, {
+          withCredentials: true,
         });
+
+        const data = res.data.user;
+        setName(data.name || "");
+        setEmail(data.email || "");
+        setBio(data.bio || "");
+        setUserPosts(data.posts || []);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
     };
 
-    
+    fetchUserProfile();
+  }, []);
+
   const handleLogoutClick = () => {
-    setshowmenu(false); // close the menu before logout
+    setshowmenu(false);
     handleLogout(navigate);
   };
+
   const handleToggleMenu = () => {
     setshowmenu(!showmenu);
   };
@@ -85,71 +47,85 @@ const UserDetails = () => {
   };
 
   return (
-    
-<Layout>
-    <Navbar
-      showMenu={showmenu}
-      onToggleMenu={handleToggleMenu}
-      onLogout={handleLogoutClick}
-      onDashboard={handleNavigateToDashboard}
-    />
+    <Layout>
+      <Navbar
+        showMenu={showmenu}
+        onToggleMenu={handleToggleMenu}
+        onLogout={handleLogoutClick}
+        onDashboard={handleNavigateToDashboard}
+      />
 
-<div
-  className="user-form-container"
-  style={{
-    padding: "40px",
-    maxWidth: "600px",
-    margin: "50px auto",
-    backgroundColor: "#000",
-    border: "2px solid violet",
-    borderRadius: "10px",
-    boxShadow: "0 0 15px rgba(138, 43, 226, 0.5)",
-    marginTop: "100px",
-  }}
->
-  <h2 className="form-title" style={{ textAlign: "center", color: "violet", marginBottom: "25px" }}>
-    User Profile
-  </h2>
-              <form className="user-form" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                  
-              <input
-  name="name"
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  placeholder="Name"
-  required
-  style={inputStyle}
-/>
-<input
-  name="email"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  placeholder="Email"
-  required
-  style={inputStyle}
-/>
-
-<input
-  name="password"
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  placeholder="Password"
-  required
-  style={inputStyle}
-/>
-                  
-    <input name="phone" placeholder="Phone" style={inputStyle} value={phone} onChange={(e) => setPhone(e.target.value)} />
-    <textarea name="bio" placeholder="Short bio..." style={inputStyle} value ={bio} onChange={(e) => setBio(e.target.value)} />
-    <textarea name="goals" placeholder="What are your goals?" style={inputStyle} value={goals} onChange={(e) => setGoals(e.target.value)} />
-    <input name="github" placeholder="GitHub URL" style={inputStyle} value={github} onChange={(e) => setGithub(e.target.value)}/>
-    <input name="linkedin" placeholder="LinkedIn URL" style={inputStyle} value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
-    <button type="submit" onClick={Updateprofile} style={buttonStyle}>Update Profile</button>
-    {message && <p style={{ color: "green" }}>{message}</p>}
-  </form>
-</div>
-      </Layout>
+      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff", marginBottom: "2rem", fontFamily: "sans-serif", display: "flex", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "3rem", maxWidth: "900px", width: "100%", backgroundColor: "#111", padding: "2rem", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
+          <img
+            src={`https://api.dicebear.com/7.x/micah/svg?seed=${name}`}
+            alt="Profile"
+            style={{ borderRadius: "50%", width: "150px", height: "150px", objectFit: "cover", border: "3px solid #8a2be2" }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <h2 style={{ fontSize: "2rem", fontWeight: "bold", color: "#8a2be2" }}>{name}</h2>
+              <button
+                onClick={() => navigate("/userupdatedetails")}
+                style={{
+                  backgroundColor: "#8a2be2",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  padding: "0.5rem 1rem",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  transition: "0.3s",
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                Edit Profile
+              </button>
+            </div>
+            <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}><strong>Email:</strong> {email}</p>
+            <p style={{ marginTop: "0.5rem", lineHeight: "1.4" }}>{bio}</p>
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff" }}>
+        <h3 style={{ fontSize: "1.8rem", marginBottom: "1rem", color: "#8a2be2" }}>Your Posts</h3>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            overflowY: "auto",
+            gap: "1.5rem",
+            maxHeight: "400px",
+            paddingRight: "10px",
+          }}
+        >
+          {userPosts.map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: "#1a1a1a",
+                borderRadius: "10px",
+                padding: "1.5rem",
+                color: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <strong style={{ color: "#8a2be2" }}>You ({name})</strong>
+              <p style={{ margin: "0.5rem 0" }}>{item.caption}</p>
+              <img
+                src={item.post?.mediaUrl}
+                alt="user-post"
+                style={{ width: "100%", borderRadius: "8px", objectFit: "cover", maxHeight: "400px" }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </Layout>
   );
 };
 

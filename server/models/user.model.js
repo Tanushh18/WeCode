@@ -70,7 +70,32 @@ const userSchema = mongoose.Schema(
         }
       ],
       default: [],
-    }
+    },
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",  // Reference to the User model
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",  // Reference to the User model
+      },
+    ],
+    posts: [
+      {
+        post: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Post"
+        },
+        caption: {
+          type: String,
+          default: ""
+        }
+      }
+    ]
+    
   },
   {
     timestamps: true
