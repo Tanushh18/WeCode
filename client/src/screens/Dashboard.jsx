@@ -8,6 +8,11 @@ import Layout from "../Layout1/Layout.jsx";
 import Navbar from "../Layout1/Navbar.jsx"; // we imported because we need to show the menu options and all
 import { createroom, joinroom } from "../Rooms/room.jsx";
 import Livechatroom from "../Rooms/livechatroom.jsx";
+import { io } from "socket.io-client";
+// const dotenv = require("dotenv");
+// dotenv.config();
+
+const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const Dashboard = () => {
   const [questions, setQuestions] = useState([]);
@@ -161,10 +166,12 @@ const Dashboard = () => {
   };
   const handlejoinquestionroom = (title) => {
     const roomID = slugify(title);
+    // console.log(roomID);
+    
+    // socket.emit("join-public-room", roomID);
     navigate(`/questionroom/${roomID}`);
     
-  }
-
+  };
   return (
     // <div
     //   style={{

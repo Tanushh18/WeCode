@@ -1,211 +1,53 @@
 import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
+import { useParams } from "react-router-dom";
 
 const socket = io("http://localhost:2000"); // your server URL
 
 function ChatRoom() {
+  const { roomId } = useParams();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [isMicOn, setIsMicOn] = useState(false);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const streamRef = useRef(null);
-  const liveAudioRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const [isVideoOn, setIsVideoOn] = useState(false);
-  const peerConnectionRef = useRef(null);
+  // console.log(roomId);
+  
 
+
+ 
   useEffect(() => {
-    // Incoming text messages
+    // Ensure the socket connection is only established once when the component mounts
+    socket.emit("join-public-room", roomId); // Join the room after the component mounts
+    console.log("Message ");
+    
+    // Listen for incoming messages from the server
     socket.on("receive-message", (data) => {
-      setMessages((prev) => [...prev, `${data.sender}: ${data.text}`]);
+      setMessages((prev) => [...prev, `${data.sender}: ${data.text}`]); // Update the message list
     });
 
-    // Incoming audio
-    socket.on("receive-audio", (audioBuffer) => {
-      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
-      const audioURL = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioURL);
-      audio.play();
-    });
-
-    socket.on("video-offer", async (offer) => {
-      if (!peerConnectionRef.current) {
-        peerConnectionRef.current = new RTCPeerConnection();
-
-        peerConnectionRef.current.ontrack = (event) => {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        };
-
-        peerConnectionRef.current.onicecandidate = (event) => {
-          if (event.candidate) {
-            socket.emit("ice-candidate", event.candidate);
-          }
-        };
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideoRef.current.srcObject = stream;
-
-      stream.getTracks().forEach(track => {
-        peerConnectionRef.current.addTrack(track, stream);
-      });
-
-      await peerConnectionRef.current.setRemoteDescription(offer);
-      const answer = await peerConnectionRef.current.createAnswer();
-      await peerConnectionRef.current.setLocalDescription(answer);
-      socket.emit("video-answer", answer);
-    });
-
-    socket.on("video-answer", async (answer) => {
-      await peerConnectionRef.current.setRemoteDescription(answer);
-    });
-
-    socket.on("ice-candidate", (candidate) => {
-      peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-    });
-
+    // Clean up when the component unmounts (remove event listener)
     return () => {
       socket.off("receive-message");
-      socket.off("receive-audio");
-      socket.off("video-offer");
-      socket.off("video-answer");
-      socket.off("ice-candidate");
     };
-  }, []);
+  }, [roomId]);
+     
+  
 
   // Send text message
   const sendMessage = () => {
     const trimmedMessage = message.trim();
     if (trimmedMessage) {
-      socket.emit("send-message", { text: trimmedMessage, sender: "You" });
+      socket.emit("send-message", {roomId, text: trimmedMessage, sender: "You" });
       setMessages((prev) => [...prev, `You: ${trimmedMessage}`]);
       setMessage("");
     }
   };
 
-  // Toggle mic recording and live test
-  const toggleMic = async () => {
-    if (!isMicOn) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log("✅ Mic stream tracks:", stream.getAudioTracks());
-        const track = stream.getAudioTracks()[0];
-        console.log("Mic enabled:", track.enabled, "State:", track.readyState);
-
-        // Optional live playback:
-        const liveAudio = new Audio();
-        liveAudio.srcObject = stream;
-        liveAudio.play();
-        liveAudioRef.current = liveAudio;  // Store audio reference
-        streamRef.current = stream;        // Store stream reference
-        console.log("🔊 Live mic audio playing through speakers...");
-
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-          console.log("🎙️ Audio chunk size:", event.data.size);
-          if (event.data.size > 0) {
-            audioChunksRef.current.push(event.data);
-          }
-        };
-
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          socket.emit("send-audio", audioBlob);
-          console.log("📤 Sent recorded audio blob.");
-        };
-
-        mediaRecorder.start();
-        console.log("🎙️ Mic recording started...");
-        setIsMicOn(true);
-
-      } catch (err) {
-        console.error("❌ Could not access microphone:", err);
-      }
-
-    } else {
-      // Stop the MediaRecorder
-      mediaRecorderRef.current.stop();
-
-      // Stop the media stream tracks
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        console.log("🎙️ Mic stream stopped.");
-      }
-
-      // Stop live playback
-      if (liveAudioRef.current) {
-        liveAudioRef.current.pause();
-        liveAudioRef.current.srcObject = null;
-        console.log("🔇 Live mic audio playback stopped.");
-      }
-
-      setIsMicOn(false);
-      console.log("🎙️ Mic recording stopped.");
-    }
-  };
-
-  const toggleVideo = async () => {
-    if (!isVideoOn) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideoRef.current.srcObject = stream;
-
-        peerConnectionRef.current = new RTCPeerConnection();
-
-        stream.getTracks().forEach(track => {
-          peerConnectionRef.current.addTrack(track, stream);
-        });
-
-        peerConnectionRef.current.ontrack = (event) => {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        };
-
-        peerConnectionRef.current.onicecandidate = (event) => {
-          if (event.candidate) {
-            socket.emit("ice-candidate", event.candidate);
-          }
-        };
-
-        const offer = await peerConnectionRef.current.createOffer();
-        await peerConnectionRef.current.setLocalDescription(offer);
-        socket.emit("video-offer", offer);
-
-        setIsVideoOn(true);
-        console.log("🎥 Video stream started.");
-      } catch (err) {
-        console.error("❌ Could not access webcam:", err);
-      }
-    } else {
-      const stream = localVideoRef.current.srcObject;
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        localVideoRef.current.srcObject = null;
-        remoteVideoRef.current.srcObject = null;
-      }
-
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-        peerConnectionRef.current = null;
-      }
-
-      setIsVideoOn(false);
-      console.log("🎥 Video stream stopped.");
-    }
-  };
+ 
 
   return (
     <div style={styles.container}>
       <header style={styles.header}>🎨 Your Chat Room Header</header>
 
-      <div style={styles.videoContainer}>
-        <video ref={localVideoRef} autoPlay muted style={styles.video} />
-        <video ref={remoteVideoRef} autoPlay style={styles.video} />
-      </div>
+      
 
       <div style={styles.chatArea}>
         {messages.map((msg, index) => (
@@ -223,24 +65,7 @@ function ChatRoom() {
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
         <button onClick={sendMessage} style={styles.sendButton}>Send</button>
-        <button
-          onClick={toggleMic}
-          style={{
-            ...styles.micButton,
-            backgroundColor: isMicOn ? "#ff4c4c" : "#4CAF50"
-          }}
-        >
-          🎙️
-        </button>
-        <button
-          onClick={toggleVideo}
-          style={{
-            ...styles.videoButton,
-            backgroundColor: isVideoOn ? "#ff4c4c" : "#4CAF50"
-          }}
-        >
-          🎥
-        </button>
+     
       </footer>
     </div>
   );
