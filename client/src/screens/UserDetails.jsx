@@ -12,6 +12,8 @@ const UserDetails = () => {
   const [email, setEmail] = React.useState("");
   const [bio, setBio] = useState("");
   const [userPosts, setUserPosts] = useState([]);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -31,6 +33,20 @@ const UserDetails = () => {
     };
 
     fetchUserProfile();
+
+    const fetchFollowDashboard = async () => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_FOLLOW_DASHBOARD, {
+          withCredentials: true,
+        });
+        setFollowersCount(response.data.followed_count || 0);
+        setFollowingCount(response.data.following_count || 0);
+      } catch (error) {
+        console.error("Error fetching follow dashboard:", error);
+      }
+    };
+
+    fetchFollowDashboard();
   }, []);
 
   const handleLogoutClick = () => {
@@ -84,6 +100,9 @@ const UserDetails = () => {
               </button>
             </div>
             <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}><strong>Email:</strong> {email}</p>
+            <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+              <strong>Followers:</strong> {followersCount} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Following:</strong> {followingCount}
+            </p>
             <p style={{ marginTop: "0.5rem", lineHeight: "1.4" }}>{bio}</p>
           </div>
         </div>
