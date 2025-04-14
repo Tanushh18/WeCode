@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 
 const fetchuserprofile = async (req, res) => {
     try {
-        const user = await User.findOne({ email: req.user.email });
+        const user = await User.findOne({ email: req.user.email }).populate("posts.post");
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }

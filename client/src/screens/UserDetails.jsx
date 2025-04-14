@@ -11,6 +11,7 @@ const UserDetails = () => {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bio, setBio] = useState("");
+  const [userPosts, setUserPosts] = useState([]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -23,6 +24,7 @@ const UserDetails = () => {
         setName(data.name || "");
         setEmail(data.email || "");
         setBio(data.bio || "");
+        setUserPosts(data.posts || []);
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -53,64 +55,72 @@ const UserDetails = () => {
         onDashboard={handleNavigateToDashboard}
       />
 
-      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff",marginBottom: "2rem", fontFamily: "sans-serif", display: "flex", justifyContent: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "4rem", maxWidth: "1000px", width: "100%" }}>
+      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff", marginBottom: "2rem", fontFamily: "sans-serif", display: "flex", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "3rem", maxWidth: "900px", width: "100%", backgroundColor: "#111", padding: "2rem", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
           <img
             src={`https://api.dicebear.com/7.x/micah/svg?seed=${name}`}
             alt="Profile"
-            style={{ borderRadius: "50%", width: "180px", height: "180px", objectFit: "cover" }}
+            style={{ borderRadius: "50%", width: "150px", height: "150px", objectFit: "cover", border: "3px solid #8a2be2" }}
           />
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
-              <h2 style={{ fontSize: "2rem", fontWeight: "bold" }}>{name}</h2>
+              <h2 style={{ fontSize: "2rem", fontWeight: "bold", color: "#8a2be2" }}>{name}</h2>
               <button
                 onClick={() => navigate("/userupdatedetails")}
                 style={{
-                  backgroundColor: "#333",
+                  backgroundColor: "#8a2be2",
                   color: "#fff",
                   border: "none",
                   borderRadius: "5px",
                   padding: "0.5rem 1rem",
                   cursor: "pointer",
-                  fontSize: "1rem"
+                  fontSize: "1rem",
+                  transition: "0.3s",
                 }}
+                onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 Edit Profile
               </button>
             </div>
-            <p>Email: {email}</p>
-            <p style={{ marginTop: "0.5rem" }}>{bio}</p>
+            <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}><strong>Email:</strong> {email}</p>
+            <p style={{ marginTop: "0.5rem", lineHeight: "1.4" }}>{bio}</p>
           </div>
         </div>
       </div>
       <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff" }}>
-        <h3 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Posts</h3>
+        <h3 style={{ fontSize: "1.8rem", marginBottom: "1rem", color: "#8a2be2" }}>Your Posts</h3>
         <div
           style={{
             display: "flex",
-            flexWrap: "nowrap",
-            overflowX: "auto",
-            gap: "1rem",
-            paddingBottom: "1rem",
+            flexDirection: "column",
+            overflowY: "auto",
+            gap: "1.5rem",
+            maxHeight: "400px",
+            paddingRight: "10px",
           }}
         >
-          {/* Placeholder cards for posts */}
-          {[...Array(5)].map((_, idx) => (
+          {userPosts.map((item, idx) => (
             <div
               key={idx}
               style={{
-                minWidth: "200px",
-                height: "200px",
                 backgroundColor: "#1a1a1a",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#888",
-                fontSize: "14px",
+                borderRadius: "10px",
+                padding: "1.5rem",
+                color: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                transition: "transform 0.2s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              Post {idx + 1}
+              <strong style={{ color: "#8a2be2" }}>You ({name})</strong>
+              <p style={{ margin: "0.5rem 0" }}>{item.caption}</p>
+              <img
+                src={item.post?.mediaUrl}
+                alt="user-post"
+                style={{ width: "100%", borderRadius: "8px", objectFit: "cover", maxHeight: "400px" }}
+              />
             </div>
           ))}
         </div>
