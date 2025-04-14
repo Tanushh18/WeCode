@@ -2,32 +2,36 @@ import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
-const socket = io("http://localhost:2000"); // your server URL
+const socket = io(process.env.REACT_APP_SOCKET_URL); // your server URL
 
 function ChatRoom() {
-  const { roomId } = useParams();
+  const { publicroomID } = useParams();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  // console.log(roomId);
+
   
 
 
  
   useEffect(() => {
     // Ensure the socket connection is only established once when the component mounts
-    socket.emit("join-public-room", roomId); // Join the room after the component mounts
-    console.log("Message ");
+    socket.emit("join-public-room", publicroomID); // Join the room after the component mounts
+    // console.log("Message received ");
     
     // Listen for incoming messages from the server
     socket.on("receive-message", (data) => {
+      // console.log("Message received 2");
+      
       setMessages((prev) => [...prev, `${data.sender}: ${data.text}`]); // Update the message list
     });
+    // console.log("Message receieved 1");
+    
 
     // Clean up when the component unmounts (remove event listener)
     return () => {
       socket.off("receive-message");
     };
-  }, [roomId]);
+  }, [publicroomID]);
      
   
 
@@ -35,7 +39,7 @@ function ChatRoom() {
   const sendMessage = () => {
     const trimmedMessage = message.trim();
     if (trimmedMessage) {
-      socket.emit("send-message", {roomId, text: trimmedMessage, sender: "You" });
+      socket.emit("send-message", {publicroomID, text: trimmedMessage, sender: "You" });
       setMessages((prev) => [...prev, `You: ${trimmedMessage}`]);
       setMessage("");
     }

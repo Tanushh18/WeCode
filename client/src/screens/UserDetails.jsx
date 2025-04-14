@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { handleLogout } from "../utils/Logout";
@@ -7,75 +7,35 @@ import Navbar from "../Layout1/Navbar";
 
 const UserDetails = () => {
   const [showmenu, setshowmenu] = React.useState(false);
-    const navigate = useNavigate();
-    const [name , setName] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
-    const [phone, setPhone] = useState("");
-    const [bio, setBio] = useState("");
-    const [goals, setGoals] = useState("");
-    const [github, setGithub] = useState("");
-    const [linkedin, setLinkedin] = useState("");
-    const [message , setMessage] = React.useState("");
-    
-    
+  const navigate = useNavigate();
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [bio, setBio] = useState("");
 
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-          try {
-            const res = await axios.get(process.env.REACT_APP_USER_PROFILE, {
-              withCredentials: true,
-            });
-      
-            const data = res.data.user; // ✅ Fix here
-            setName(data.name || "");
-            setEmail(data.email || "");
-            setPhone(data.phone || "");
-            setBio(data.bio || "");
-            setGoals(data.goals || "");
-            setGithub(data.github || "");
-            setLinkedin(data.linkedin || "");
-          } catch (error) {
-            console.error("Error fetching profile:", error);
-          }
-        };
-      
-        fetchUserProfile();
-      }, []);
-    
-    const Updateprofile = (e) => {
-        e.preventDefault();
-        axios .post(process.env.REACT_APP_USER_UPDATE_PROFILE, {
-            name,
-            email,
-            password,
-            phone,
-            bio,
-            goals,
-            github,
-            linkedin
-    
-    
-        },
-        {
-            withCredentials: true
-        })
-            
-            
-        .then((res) => {
-            setMessage("Data Updated Successfully");
-        })
-        .catch((err) => {
-            console.log(err);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await axios.get(process.env.REACT_APP_USER_PROFILE, {
+          withCredentials: true,
         });
+
+        const data = res.data.user;
+        setName(data.name || "");
+        setEmail(data.email || "");
+        setBio(data.bio || "");
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
     };
 
-    
+    fetchUserProfile();
+  }, []);
+
   const handleLogoutClick = () => {
-    setshowmenu(false); // close the menu before logout
+    setshowmenu(false);
     handleLogout(navigate);
   };
+
   const handleToggleMenu = () => {
     setshowmenu(!showmenu);
   };
@@ -85,71 +45,77 @@ const UserDetails = () => {
   };
 
   return (
-    
-<Layout>
-    <Navbar
-      showMenu={showmenu}
-      onToggleMenu={handleToggleMenu}
-      onLogout={handleLogoutClick}
-      onDashboard={handleNavigateToDashboard}
-    />
+    <Layout>
+      <Navbar
+        showMenu={showmenu}
+        onToggleMenu={handleToggleMenu}
+        onLogout={handleLogoutClick}
+        onDashboard={handleNavigateToDashboard}
+      />
 
-<div
-  className="user-form-container"
-  style={{
-    padding: "40px",
-    maxWidth: "600px",
-    margin: "50px auto",
-    backgroundColor: "#000",
-    border: "2px solid violet",
-    borderRadius: "10px",
-    boxShadow: "0 0 15px rgba(138, 43, 226, 0.5)",
-    marginTop: "100px",
-  }}
->
-  <h2 className="form-title" style={{ textAlign: "center", color: "violet", marginBottom: "25px" }}>
-    User Profile
-  </h2>
-              <form className="user-form" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                  
-              <input
-  name="name"
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  placeholder="Name"
-  required
-  style={inputStyle}
-/>
-<input
-  name="email"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  placeholder="Email"
-  required
-  style={inputStyle}
-/>
-
-<input
-  name="password"
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  placeholder="Password"
-  required
-  style={inputStyle}
-/>
-                  
-    <input name="phone" placeholder="Phone" style={inputStyle} value={phone} onChange={(e) => setPhone(e.target.value)} />
-    <textarea name="bio" placeholder="Short bio..." style={inputStyle} value ={bio} onChange={(e) => setBio(e.target.value)} />
-    <textarea name="goals" placeholder="What are your goals?" style={inputStyle} value={goals} onChange={(e) => setGoals(e.target.value)} />
-    <input name="github" placeholder="GitHub URL" style={inputStyle} value={github} onChange={(e) => setGithub(e.target.value)}/>
-    <input name="linkedin" placeholder="LinkedIn URL" style={inputStyle} value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
-    <button type="submit" onClick={Updateprofile} style={buttonStyle}>Update Profile</button>
-    {message && <p style={{ color: "green" }}>{message}</p>}
-  </form>
-</div>
-      </Layout>
+      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff",marginBottom: "2rem", fontFamily: "sans-serif", display: "flex", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4rem", maxWidth: "1000px", width: "100%" }}>
+          <img
+            src={`https://api.dicebear.com/7.x/micah/svg?seed=${name}`}
+            alt="Profile"
+            style={{ borderRadius: "50%", width: "180px", height: "180px", objectFit: "cover" }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <h2 style={{ fontSize: "2rem", fontWeight: "bold" }}>{name}</h2>
+              <button
+                onClick={() => navigate("/userupdatedetails")}
+                style={{
+                  backgroundColor: "#333",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  padding: "0.5rem 1rem",
+                  cursor: "pointer",
+                  fontSize: "1rem"
+                }}
+              >
+                Edit Profile
+              </button>
+            </div>
+            <p>Email: {email}</p>
+            <p style={{ marginTop: "0.5rem" }}>{bio}</p>
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff" }}>
+        <h3 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Posts</h3>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "nowrap",
+            overflowX: "auto",
+            gap: "1rem",
+            paddingBottom: "1rem",
+          }}
+        >
+          {/* Placeholder cards for posts */}
+          {[...Array(5)].map((_, idx) => (
+            <div
+              key={idx}
+              style={{
+                minWidth: "200px",
+                height: "200px",
+                backgroundColor: "#1a1a1a",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#888",
+                fontSize: "14px",
+              }}
+            >
+              Post {idx + 1}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Layout>
   );
 };
 

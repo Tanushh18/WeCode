@@ -31,7 +31,7 @@ const LoginScreen = () => {
             );
             
           setMessage(response.data.message);
-          navigate("/Dashboard");
+          navigate("/Feed");
           
         } catch (error) {
             console.error(error);

@@ -7,7 +7,7 @@ import { CODE_SNIPPETS } from "../constants";
 import { io } from "socket.io-client";
 
 // Global socket instance (only created once)
-const socket = io("http://localhost:2000", {
+const socket = io(process.env.REACT_APP_SOCKET_URL, {
   withCredentials: true,
   autoConnect: false, // Connect manually
 });

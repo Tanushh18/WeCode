@@ -21,20 +21,21 @@ const setupSocket = (server) => {
     socket.on("code-change", ({ roomId, code }) => {
       socket.to(roomId).emit("code-change", code);
     });
-    socket.on("join-public-room", (publicroomId) => {
-      socket.join(publicroomId);
-      
-      console.log(`🟢 Socket ${socket.id} joined public room: ${publicroomId}`);
+    // we have to join the room also for etting the messages
+    socket.on("join-public-room", (publicroomID) => {
+      socket.join(publicroomID);
+      // console.log(`🟢 Socket ${socket.id} joined public room: ${publicroomID}`);
     });
     
-    socket.on("send-message", ({ roomId, ...data }) => {
-      if (!roomId) {
+    
+    socket.on("send-message", ({ publicroomID, ...data }) => {
+      if (!publicroomID) {
         console.warn("⚠️ No public room ID provided");
         return;
       }
     
-      console.log(`📝 Sending message to room: ${roomId}`);
-      socket.to(roomId).emit("receive-message", data);
+      // console.log(`📝 Sending message to room: ${publicroomID}`);
+      socket.to(publicroomID).emit("receive-message", data);
       // Optional: If you want to send it back to the sender as well
       // socket.emit("receive-message", data);
     });

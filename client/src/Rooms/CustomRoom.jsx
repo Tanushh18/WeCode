@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
 import Layout from "../Layout1/Layout";
 import { Box, Text } from "@chakra-ui/react";
-import VideoConferencing from "./VideoConferencing";
+
 
 const CustomRoom = () => {
   const { roomId } = useParams();
