@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+
 import quoteList from "../utils/quotes";
 import { handleLogout } from "../utils/Logout";
 import Layout from "../Layout1/Layout";
 import Navbar from "../Layout1/Navbar";
 import { createroom, joinroom } from "../Rooms/room.jsx";
+
+
 
 const Dashboard = () => {
   const [questions, setQuestions] = useState([]);
@@ -114,6 +117,7 @@ const Dashboard = () => {
     handleLogout(navigate);
   };
 
+
   const handleToggleMenu = () => {
     setshowmenu(!showmenu);
   };
@@ -121,6 +125,34 @@ const Dashboard = () => {
   const handleNavigateToDashboard = () => {
     navigate("/dashboard");
   };
+
+  const handleLogoutClick = () => {
+    setshowmenu(false); // close the menu before logout
+    handleLogout(navigate);
+  };
+  const handleToggleMenu = () => {
+    setshowmenu(!showmenu);
+  };
+
+  const handleNavigateToDashboard = () => {
+    navigate("/dashboard");
+  };
+
+
+  const slugify = (str) => {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+  const handlejoinquestionroom = (title) => {
+    const roomID = slugify(title);
+    navigate(`/questionroom/${roomID}`);
+    
+  }
+
 
   return (
     <Layout>
@@ -130,6 +162,76 @@ const Dashboard = () => {
         onLogout={handleLogoutClick}
         onDashboard={handleNavigateToDashboard}
       />
+
+
+      <div
+        style={{ display: "flex", justifyContent: "flex-end", padding: "2px" }}
+      >
+        <button
+          style={{
+            backgroundColor: "#1a1a1a",
+            padding: "10px 20px",
+            color: "white",
+            border: "1px solid violet",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "0.3s",
+            boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
+          }}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.boxShadow = "0 0 16px violet")
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.boxShadow =
+              "0 0 8px rgba(138, 43, 226, 0.3)")
+          }
+          onClick={handleCreateRoom}
+        >
+          Create Room
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <input
+            type="text"
+            placeholder="Enter Room ID"
+            value={joinRoomId}
+            onChange={(e) => setJoinRoomId(e.target.value)}
+            style={{
+              backgroundColor: "#1a1a1a",
+              color: "white",
+              border: "1px solid violet",
+              borderRadius: "8px",
+              padding: "10px",
+              outline: "none",
+            }}
+          />
+          <button
+            style={{
+              backgroundColor: "#1a1a1a",
+              padding: "10px 20px",
+              color: "white",
+              border: "1px solid violet",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "0.3s",
+              boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
+            }}
+            onClick={handleJoinRoom}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.boxShadow = "0 0 16px violet")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.boxShadow =
+                "0 0 8px rgba(138, 43, 226, 0.3)")
+            }
+          >
+            Join Room
+          </button>
+        </div>
+      </div>
+
 
       <h1
         style={{
@@ -243,11 +345,59 @@ const Dashboard = () => {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "black" }}>
+
               <th style={{ border: "1px solid #ddd", padding: "8px", color: "white" }}>Title</th>
               <th style={{ border: "1px solid #ddd", padding: "8px", color: "white" }}>Difficulty</th>
               <th style={{ border: "1px solid #ddd", padding: "8px", color: "white" }}>Revision</th>
               <th style={{ border: "1px solid #ddd", padding: "8px", color: "white" }}>Important</th>
               <th style={{ border: "1px solid #ddd", padding: "8px", color: "white" }}>Action</th>
+
+              <th
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  color: "white",
+                }}
+              >
+                Title
+              </th>
+              <th
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  color: "white",
+                }}
+              >
+                Difficulty
+              </th>
+              <th
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  color: "white",
+                }}
+              >
+                Revision
+              </th>
+              <th
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  color: "white",
+                }}
+              >
+                Important
+              </th>
+              <th
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  color: "white",
+                }}
+              >
+                Public Room
+              </th>
+
             </tr>
           </thead>
           <tbody>
@@ -270,6 +420,7 @@ const Dashboard = () => {
                       cursor: "pointer",
                     }}
                   >
+
                     Toggle Revision
                   </button>
                   <button
@@ -285,6 +436,63 @@ const Dashboard = () => {
                   >
                     Toggle Important
                   </button>
+
+                    {q.Title}
+                  </a>
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    color: "white",
+                  }}
+                >
+                  {q.Difficulty}
+                </td>
+
+                <td
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    color: "white",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={q.Revision === "Yes"}
+                    onChange={() =>
+                      handleUpdateQuestion(index, "Revision", q.Revision)
+                    }
+                  />
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    color: "white",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={q.Important === "Yes"}
+                    onChange={() =>
+                      handleUpdateQuestion(index, "Important", q.Important)
+                    }
+                  />
+                </td>
+
+                <td
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    color: "white",
+                  }}
+                >
+                  <button onClick={() => handlejoinquestionroom(q.Title)}>
+  Join Room
+</button>
+
+
                 </td>
               </tr>
             ))}
