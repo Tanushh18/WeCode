@@ -199,7 +199,7 @@ navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
               <th style={thStyle}>Title</th>
               <th style={thStyle}>Difficulty</th>
               <th style={thStyle}>Revision</th>
-              <th style={thStyle}>Important</th>
+              <th style={thStyle}>Submitted</th>
               <th style={thStyle}>Solve</th>
               <th style={thStyle}>Join Room</th>
               <th style={thStyle}>Private Room</th>
