@@ -21,7 +21,7 @@ function App() {
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/userdetails" element={<UserDetails />} />
         <Route path="/userupdatedetails" element={<UserUpdateDetails />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dsadashboard" element={<Dashboard />} />
         <Route path="/follow-dashboard" element={<FollowDashboard />} />
         <Route path="/upload-post" element={<UploadPosts />} />
         <Route path="/room/:roomId" element={<CustomRoom />} />

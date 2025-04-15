@@ -36,24 +36,6 @@ const Dashboard = () => {
     fetchExcel();
   }, []);
 
-  // useEffect(() => {
-  //   const style = document.createElement("style"); 
-  //   style.innerHTML = `
-  //     @keyframes pulseGlow {
-  //       from {
-  //         box-shadow: 0 0 15px rgba(138, 43, 226, 0.4), 0 0 30px rgba(138, 43, 226, 0.2);
-  //       }
-  //       to {
-  //         box-shadow: 0 0 500px rgba(138, 43, 226, 0.7), 0 0 60px rgba(138, 43, 226, 0.4);
-  //       }
-  //     }
-  //   `;
-  //   document.head.appendChild(style);
-  //   return () => {
-  //     document.head.removeChild(style);
-  //   };
-  // }, []);
-
   const handleCreateRoom = () => createroom(navigate);
 
   const handleJoinRoom = () => {
@@ -122,7 +104,7 @@ const Dashboard = () => {
   };
 
   const handleNavigateToDashboard = () => {
-    navigate("/dashboard");
+    navigate("/dsadashboard");
   };
 
   const slugify = (str) => {
@@ -148,22 +130,6 @@ const Dashboard = () => {
         onDashboard={handleNavigateToDashboard}
       />
 
-      <div style={{ display: "flex", justifyContent: "flex-end", padding: "2px" }}>
-        <button onClick={handleCreateRoom} style={buttonStyle}>Create Room</button>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <input
-            type="text"
-            placeholder="Enter Room ID"
-            value={joinRoomId}
-            onChange={(e) => setJoinRoomId(e.target.value)}
-            style={inputStyle}
-          />
-          <button onClick={handleJoinRoom} style={buttonStyle}>Join Room</button>
-          <button onClick={() => navigate("/follow-dashboard")} style={buttonStyle}>Follow Dashboard</button>
-          <button onClick={() => navigate("/upload-post")} style={buttonStyle}>Upload Post</button>
-        </div>
-      </div>
-
       <h1 style={{ textAlign: "center", fontSize: "2.5rem", marginTop: "150px", marginBottom: "30px" }}>
         {quote}
       </h1>
@@ -179,6 +145,7 @@ const Dashboard = () => {
               <th style={thStyle}>Important</th>
               <th style={thStyle}>Actions</th>
               <th style={thStyle}>Join Room</th>
+              <th style={thStyle}>Private Room</th>
             </tr>
           </thead>
           <tbody>
@@ -217,6 +184,11 @@ const Dashboard = () => {
                 <td style={tdStyle}>
                   <button onClick={() => handleJoinQuestionRoom(q.Title)} style={buttonStyle}>
                     Join Room
+                  </button>
+                </td>
+                <td style={tdStyle}>
+                  <button onClick={() => handleCreateRoom()} style={buttonStyle}>
+                    Create Room
                   </button>
                 </td>
               </tr>

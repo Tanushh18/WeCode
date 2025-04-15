@@ -94,9 +94,7 @@ const UserUpdateDetails = () => {
     setshowmenu(!showmenu);
   };
 
-  const handleNavigateToDashboard = () => {
-    navigate("/dashboard");
-  };
+  
 
   return (
     <Layout>
@@ -104,7 +102,7 @@ const UserUpdateDetails = () => {
         showMenu={showmenu}
         onToggleMenu={handleToggleMenu}
         onLogout={handleLogoutClick}
-        onDashboard={handleNavigateToDashboard}
+        
       />
 
       <div

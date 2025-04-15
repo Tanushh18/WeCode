@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Navbar from "../Layout1/Navbar.jsx";
+import Footer from "../Layout1/Footer.jsx";
 
 const FollowDashboard = () => {
   const [followingName, setFollowingName] = useState("");
@@ -94,14 +96,16 @@ const FollowDashboard = () => {
       setMessage(error.response?.data?.message || "Error unfollowing user");
     }
   };
+
+
     
-  const [showmenu, setshowmenu] = React.useState(false);
+  
 
   return (
     <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff", minHeight: "100vh", fontFamily: "sans-serif" }}>
-      
+      <Navbar />
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
-        <div style={{ marginTop: "0rem" }}>
+        <div style={{ marginTop: "50px" }}>
           <input
             type="text"
             placeholder="Username to follow/unfollow"
@@ -173,6 +177,7 @@ const FollowDashboard = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };

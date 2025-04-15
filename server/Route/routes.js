@@ -43,6 +43,7 @@ router.get("/follow-dashboard", verifyToken, FollowDashboard);
 router.post("/upload-post", upload.fields([{ name: 'posts', maxCount: 10 }]), verifyToken, postcontroller);
 router.get("/Feed", verifyToken, Feedcontroller);
 
+
 router.post("/logout", verifyToken, logoutUser);
 
 module.exports = router; // Export router

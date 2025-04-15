@@ -104,7 +104,9 @@ const FollowDashboard = async (req, res) => {
   try {
     const following_count = await Follow.countDocuments({ following_id: req.user._id });
     const followed_count = await Follow.countDocuments({ followed_id: req.user._id });
-    return res.status(200).json({ following_count, followed_count });
+    const Followers_user_names = await Follow.find({ followed_id: req.user._id }).populate("following_id", "name");
+    const Following_user_names = await Follow.find({ following_id: req.user._id }).populate("followed_id", "name");
+    return res.status(200).json({ following_count, followed_count , Followers_user_names, Following_user_names });
   } catch (error) {
     console.error("❌ Error in FollowDashboard:", error);
     return res.status(500).json({ message: "Server error." });

@@ -14,6 +14,10 @@ const UserDetails = () => {
   const [userPosts, setUserPosts] = useState([]);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [followers_name, setFollowers_name] = useState([]);
+  const [following_name, setFollowing_name] = useState([]);
+  const [showFollowersPopup, setShowFollowersPopup] = useState(false);
+  const [showFollowingPopup, setShowFollowingPopup] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -41,6 +45,8 @@ const UserDetails = () => {
         });
         setFollowersCount(response.data.followed_count || 0);
         setFollowingCount(response.data.following_count || 0);
+        setFollowers_name(response.data.Followers_user_names|| []);
+        setFollowing_name(response.data.Following_user_names || []);
       } catch (error) {
         console.error("Error fetching follow dashboard:", error);
       }
@@ -54,12 +60,15 @@ const UserDetails = () => {
     handleLogout(navigate);
   };
 
+  const toggleFollowersPopup = () => setShowFollowersPopup(!showFollowersPopup);
+  const toggleFollowingPopup = () => setShowFollowingPopup(!showFollowingPopup);
+
   const handleToggleMenu = () => {
     setshowmenu(!showmenu);
   };
 
   const handleNavigateToDashboard = () => {
-    navigate("/dashboard");
+    navigate("/dsadashboard");
   };
 
   return (
@@ -101,12 +110,67 @@ const UserDetails = () => {
             </div>
             <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}><strong>Email:</strong> {email}</p>
             <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              <strong>Followers:</strong> {followersCount} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Following:</strong> {followingCount}
+              <strong style={{ cursor: "pointer" }} onClick={toggleFollowersPopup}>Followers: {followersCount}</strong>
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <strong style={{ cursor: "pointer" }} onClick={toggleFollowingPopup}>Following: {followingCount}</strong>
             </p>
             <p style={{ marginTop: "0.5rem", lineHeight: "1.4" }}>{bio}</p>
           </div>
         </div>
       </div>
+
+      {showFollowersPopup && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+          backgroundColor: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(5px)", display: "flex",
+          alignItems: "center", justifyContent: "center", zIndex: 999
+        }}
+          onClick={() => setShowFollowersPopup(false)}
+        >
+          <div style={{
+            backgroundColor: "#111", padding: "20px", borderRadius: "10px", minWidth: "300px",
+            maxHeight: "400px", overflowY: "auto", boxShadow: "0 0 15px rgba(0,0,0,0.5)"
+          }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 style={{ color: "#8a2be2", marginBottom: "10px" }}>Followers</h4>
+            {followers_name.length > 0 ? (
+              followers_name.map((follower, idx) => (
+                <p key={idx} style={{ color: "#fff", marginBottom: "6px" }}>{follower.following_id.name}</p>
+              ))
+            ) : (
+              <p style={{ color: "#888" }}>No followers found.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showFollowingPopup && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+          backgroundColor: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(5px)", display: "flex",
+          alignItems: "center", justifyContent: "center", zIndex: 999
+        }}
+          onClick={() => setShowFollowingPopup(false)}
+        >
+          <div style={{
+            backgroundColor: "#111", padding: "20px", borderRadius: "10px", minWidth: "300px",
+            maxHeight: "400px", overflowY: "auto", boxShadow: "0 0 15px rgba(0,0,0,0.5)"
+          }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 style={{ color: "#8a2be2", marginBottom: "10px" }}>Following</h4>
+            {following_name.length > 0 ? (
+              following_name.map((followed, idx) => (
+                <p key={idx} style={{ color: "#fff", marginBottom: "6px" }}>{followed.followed_id.name}</p>
+              ))
+            ) : (
+              <p style={{ color: "#888" }}>Not following anyone.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff" }}>
         <h3 style={{ fontSize: "1.8rem", marginBottom: "1rem", color: "#8a2be2" }}>Your Posts</h3>
         <div
