@@ -36,14 +36,67 @@ const Dashboard = () => {
     fetchExcel();
   }, []);
 
-  const handleCreateRoom = () => createroom(navigate);
+  const handleCreateRoom = async (question, customState = {}) => {
+    const roomId = slugify(question.Title);
+    const roomData = {
+      roomId,
+      title: question.Title,
+      statement: question["Problem Statement"],
+      difficulty: question.Difficulty,
+      sampleInput: question["Sample Input"],
+      sampleOutput: question["Sample Output"],
+      constraints: question.Constraints,
+    };
 
-  const handleJoinRoom = () => {
-    if (!joinRoomId) {
-      alert("Please enter a Room ID!");
-      return;
+    try {
+      const response = await axios.get(process.env.REACT_APP_ROOM_CREATE, {
+        withCredentials: true,
+      });
+      const privateRoomId = response.data.roomId;
+
+      navigate(`/customroom/${roomId}/${privateRoomId}`, {
+        state: { question: roomData, ...customState }
+      });
+    } catch (error) {
+      console.error("❌ Failed to create private room:", error);
     }
-    joinroom(joinRoomId, navigate);
+  }
+
+  const handleJoinRoom = async (question) => {
+    const privateRoomId = prompt(`Enter private room ID for "${question.Title}"`);
+    console.log("Private Room ID:", privateRoomId);
+    
+    if (!privateRoomId) return;
+  
+    try {
+      await axios.post(
+        process.env.REACT_APP_ROOM_JOIN,
+        { roomId: privateRoomId },
+        { withCredentials: true }
+      );
+  
+      console.log("✅ Joined Room:", privateRoomId);
+  
+      const publicRoomId = slugify(question.Title);
+      console.log("Navigating to room...");
+navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
+        state: {
+          question: {
+            title: question.Title,
+            statement: question["Problem Statement"],
+            difficulty: question.Difficulty,
+            sampleInput: question["Sample Input"],
+            sampleOutput: question["Sample Output"],
+            constraints: question.Constraints,
+          },
+        },
+});
+    } catch (error) {
+      const errMsg = error?.response?.data?.message;
+  
+      console.log("❌ Room join failed:", errMsg);
+      
+    }
   };
 
   const handleUpdateQuestion = async (index, field, value) => {
@@ -121,6 +174,10 @@ const Dashboard = () => {
     navigate(`/questionroom/${publicroomID}`);
   };
 
+  const handleSolvequestion = (question) => {
+    handleCreateRoom(question, { hideRoomId: true });
+  } 
+
   return (
     <Layout>
       <Navbar
@@ -143,9 +200,10 @@ const Dashboard = () => {
               <th style={thStyle}>Difficulty</th>
               <th style={thStyle}>Revision</th>
               <th style={thStyle}>Important</th>
-              <th style={thStyle}>Actions</th>
+              <th style={thStyle}>Solve</th>
               <th style={thStyle}>Join Room</th>
               <th style={thStyle}>Private Room</th>
+              <th style={thStyle}>Join Private Room</th>
             </tr>
           </thead>
           <tbody>
@@ -185,18 +243,11 @@ const Dashboard = () => {
                 </td>
                 <td style={tdStyle}>
                   <button
-                    onClick={() => handleUpdateQuestion(index, "Revision", q.Revision)}
                     style={actionBtnStyle1}
-                    title="Toggle Revision"
+                    title="Submit Solution"
+                    onClick={() => handleSolvequestion(q)}
                   >
-                    Toggle Revision
-                  </button>
-                  <button
-                    onClick={() => handleUpdateQuestion(index, "Important", q.Important)}
-                    style={actionBtnStyle2}
-                    title="Toggle Important"
-                  >
-                    Toggle Important
+                    Submit
                   </button>
                 </td>
                 <td style={tdStyle}>
@@ -205,8 +256,17 @@ const Dashboard = () => {
                   </button>
                 </td>
                 <td style={tdStyle}>
-                  <button onClick={() => handleCreateRoom()} style={buttonStyle} title="Create a private room">
+                  <button onClick={() => handleCreateRoom(q)} style={buttonStyle} title="Create a private room">
                     Create Room
+                  </button>
+                </td>
+                <td style={tdStyle}>
+                  <button
+                    onClick={() => handleJoinRoom(q)}
+                    style={buttonStyle}
+                    title="Join a private room"
+                  >
+                    Join Private
                   </button>
                 </td>
               </tr>

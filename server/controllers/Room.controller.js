@@ -41,13 +41,17 @@ const joinRoom = async (req, res) => {
     if (!room) {
       return res.status(404).json({ message: "Room not found." });
     }
+    console.log("🔍 Looking for room:", roomId);
 
     // Prevent joining the same room twice
-    if (user.rooms.includes(room._id)) {
-      return res.status(400).json({ message: "User already in the room." });
-    }
-
+    // if (user.rooms.includes(room._id)) {
+    //   return res.status(400).json({ message: "User already in the room." });
+    // }
+    console.log("🔍 Room found:", room);
+    
     user.rooms.push(room._id);
+    console.log("🔍 User updated:", user);
+    
     await user.save();
 
     return res.status(200).json({ message: "Room joined successfully." });

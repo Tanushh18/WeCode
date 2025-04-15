@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { handleLogout } from "../utils/Logout";
 import { createroom, joinroom } from "../Rooms/room.jsx";
 import { io } from "socket.io-client";
+import axios from "axios";
 const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const linkStyle = {
@@ -35,14 +36,42 @@ const Navbar = () => {
     navigate("/Feed");
   };
 
-  const handleCreateRoom = () => createroom(navigate);
+  const handleCreateRoom = async () => {
+    try {
+      const roomId = await createroom({ isReadOnly: true, fromNavbar: true });
 
-  const handleJoinRoom = () => {
+      console.log("✅ Room Created in navbar:", roomId);
+      navigate(`/room/${roomId}`, {
+        state: {
+          isReadOnly: true,
+          fromNavbar: true
+        }
+      });
+    } catch (error) {
+      console.error("Failed to create room:", error);
+    }
+  }
+
+  const handleJoinRoom = async () => {
     if (!joinRoomId) {
       alert("Please enter a Room ID!");
       return;
     }
-    joinroom(joinRoomId, navigate);
+    try {
+      const roomId = await joinroom(joinRoomId);
+
+      console.log("✅ Room Joined in navbar:", roomId);
+      setShowJoinModal(false);
+      navigate(`/room/${roomId}`, {
+        state: {
+          isReadOnly: true,
+          fromNavbar: true
+        }
+      });
+    } catch (error) {
+      console.error("❌ Failed to join room:", error);
+      alert("Failed to join the room. Please check the Room ID and try again.");
+    }
   };
 
   const handleNavigateToFollowDashboard = () => {
@@ -104,7 +133,7 @@ const Navbar = () => {
             Create Room
           </button>
           <button
-            onClick={() => setShowJoinModal(true)}
+            onClick = {() => setShowJoinModal(true)}
             style={{
               padding: "8px 14px",
               color: "#fff",

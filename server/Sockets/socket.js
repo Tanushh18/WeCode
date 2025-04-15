@@ -18,8 +18,8 @@ const setupSocket = (server) => {
       console.log(`🟢 Socket ${socket.id} joined room: ${roomId}`);
     });
 
-    socket.on("code-change", ({ roomId, code }) => {
-      socket.to(roomId).emit("code-change", code);
+    socket.on("code-change", ({ privateRoomId, code }) => {
+      socket.to(privateRoomId).emit("code-change", code);
     });
     // we have to join the room also for etting the messages
     socket.on("join-public-room", (publicroomID) => {

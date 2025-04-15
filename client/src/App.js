@@ -27,6 +27,7 @@ function App() {
         <Route path="/room/:roomId" element={<CustomRoom />} />
         <Route path="/questionroom/:publicroomID" element={<Livechatroom />} />
         <Route path="/Feed" element={<Feed />} />
+        <Route path="/customroom/:publicRoomId/:privateRoomId" element={<CustomRoom />} />
       </Routes>
     </Router>
   );

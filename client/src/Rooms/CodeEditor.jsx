@@ -13,7 +13,8 @@ const socket = io(process.env.REACT_APP_SOCKET_URL, {
 });
 
 const CodeEditor = () => {
-  const { roomId } = useParams();
+  const {publicRoomId, privateRoomId} = useParams();
+  // const { roomId } = useParams();
   const editorRef = useRef(null);
 
   const [value, setValue] = useState(CODE_SNIPPETS["javascript"]);
@@ -68,11 +69,11 @@ const CodeEditor = () => {
   //     socket.off("code-change", handleIncomingCode);
   //     console.log("🧹 Left room:", roomId);
   //   };
-  // }, [roomId]);
+  // }, [privateRoomId]);
   const [socketConnected, setSocketConnected] = useState(false);
 
 useEffect(() => {
-  if (!roomId) return;
+  if (!privateRoomId) return;
 
   if (!socket.connected) {
     socket.connect();
@@ -80,8 +81,8 @@ useEffect(() => {
     socket.on("connect", () => {
       setSocketConnected(true);
       console.log("🔌 Connected to socket server");
-      socket.emit("join-room", roomId);
-      console.log("🔗 Joined room:", roomId);
+      socket.emit("join-room", privateRoomId);
+      console.log("🔗 Joined room:", privateRoomId);
     });
   }
 
@@ -100,12 +101,12 @@ useEffect(() => {
     socket.disconnect();
     console.log("🧹 Disconnected from socket server");
   };
-}, [roomId]);
+}, [privateRoomId]);
   
 const handleCodeChange = (val) => {
   setValue(val);
-  if (roomId && socketConnected) {
-    socket.emit("code-change", { roomId, code: val });
+  if (privateRoomId && socketConnected) {
+    socket.emit("code-change", { privateRoomId, code: val });
   }
 };
 
