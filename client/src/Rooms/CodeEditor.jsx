@@ -25,7 +25,14 @@ const getLanguageName = (id) => {
 
 const CodeEditor = ({ editorRef, languageId, setLanguageId, defaultLanguageId = 63 }) => {
   const { publicRoomId, privateRoomId } = useParams();
-  const [value, setValue] = useState(CODE_SNIPPETS[getLanguageName(defaultLanguageId)]);
+  const [value, setValue] = useState(() => {
+    const lang = getLanguageName(defaultLanguageId);
+    const questionTitle = publicRoomId?.replace(/-/g, " ");
+    if (questionTitle && window.defaultQuestionCode?.[questionTitle.toLowerCase()]) {
+      return window.defaultQuestionCode[questionTitle.toLowerCase()][lang] || CODE_SNIPPETS[lang];
+    }
+    return CODE_SNIPPETS[lang];
+  });
   const [theme, setTheme] = useState("vs-dark");
 
   // Language selector
@@ -81,8 +88,36 @@ const CodeEditor = ({ editorRef, languageId, setLanguageId, defaultLanguageId = 
   };
 
   useEffect(() => {
-    setValue(CODE_SNIPPETS[getLanguageName(languageId)]);
+    const lang = getLanguageName(languageId);
+    const questionTitle = publicRoomId?.replace(/-/g, " ");
+    if (questionTitle && window.defaultQuestionCode?.[questionTitle.toLowerCase()]) {
+      setValue(window.defaultQuestionCode[questionTitle.toLowerCase()][lang] || CODE_SNIPPETS[lang]);
+    } else {
+      setValue(CODE_SNIPPETS[lang]);
+    }
   }, [languageId]);
+
+  useEffect(() => {
+    const fetchDefaultCode = async () => {
+      const title = publicRoomId?.replace(/-/g, " ");
+      const lang = getLanguageName(languageId);
+      if (!title) return;
+
+      try {
+        const res = await fetch(`${process.env.REACT_APP_TESTCASE_API}/default/${title}`);
+        const data = await res.json();
+        const defaultCode = data?.defaultCode;
+
+        if (defaultCode) {
+          setValue(defaultCode);
+        }
+      } catch (err) {
+        console.error("Failed to load default code from backend", err);
+      }
+    };
+
+    fetchDefaultCode();
+  }, [publicRoomId]);
 
   return (
     <HStack align="start" spacing={4} p={4}>
@@ -92,7 +127,6 @@ const CodeEditor = ({ editorRef, languageId, setLanguageId, defaultLanguageId = 
           theme={theme}
           language={getLanguageName(languageId)}
           value={value}
-          defaultValue={CODE_SNIPPETS[getLanguageName(languageId)]}
           onMount={onMount}
           onChange={handleCodeChange}
           options={{

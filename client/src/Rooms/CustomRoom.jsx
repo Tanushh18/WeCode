@@ -19,10 +19,36 @@ const CustomRoom = () => {
   const [languageId, setLanguageId] = useState(63); // Default to JavaScript
   const [testCases, setTestCases] = useState([]);
   const [testResults, setTestResults] = useState([]);
+  const [initialCode, setInitialCode] = useState(`console.log("Hello, World!");`); // Added state for initial code
   const editorRef = useRef(null);
 
+  useEffect(() => {
+    const fetchDefaultCode = async () => {
+      const title = question?.title || publicRoomId?.replace(/-/g, " ");
+      if (!title) return;
+
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_TESTCASE_API}/default/${title}`);
+        const defaultCode = res.data.defaultCode;
+
+        window.defaultQuestionCode = {
+          ...window.defaultQuestionCode,
+          [title.toLowerCase()]: {
+            javascript: defaultCode
+          }
+        };
+
+        setInitialCode(defaultCode); // set the code locally too
+      } catch (err) {
+        console.error("Failed to fetch default code:", err);
+      }
+    };
+
+    fetchDefaultCode();
+  }, [question?.title, publicRoomId]);
+
   const handleRunCode = async () => {
-    const code = editorRef.current?.getValue();
+    let code = editorRef.current?.getValue();
     if (!code || !question?.title) {
       setOutput("Editor is empty or no question loaded.");
       return;
@@ -39,7 +65,7 @@ const CustomRoom = () => {
         const result = await runCodeWithJudge0({
           source_code: code,
           language_id: languageId,
-          stdin: test.Input,
+          stdin: "",
         });
 
         const output = result.stdout?.trim() || result.stderr?.trim() || "No output";
@@ -92,6 +118,7 @@ const CustomRoom = () => {
             editorRef={editorRef}
             languageId={languageId}
             setLanguageId={setLanguageId}
+            initialCode={initialCode} // Updated to use local state
           />
           <Button mt={4} colorScheme="blue" onClick={handleRunCode}>
             Run Code

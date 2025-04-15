@@ -5,6 +5,7 @@ const {
   loginUser,
   logoutUser,
   getTestCasesByTitle,
+  getDefaultCodeByTitle,
 } = require("../controllers/Route.controller");
 const {
   updateQuestion,
@@ -45,6 +46,7 @@ router.post("/upload-post", upload.fields([{ name: 'posts', maxCount: 10 }]), ve
 router.get("/Feed", verifyToken, Feedcontroller);
 
 router.get("/testcases/:title", getTestCasesByTitle);
+router.get("/testcases/default/:title", getDefaultCodeByTitle);
 
 router.post("/logout", verifyToken, logoutUser);
 

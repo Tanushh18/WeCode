@@ -104,9 +104,35 @@ const getTestCasesByTitle = (req, res) => {
   }
 };
 
+const getDefaultCodeByTitle = (req, res) => {
+  const title = req.params.title;
+  const filePath = path.join(__dirname, "../../client/public/TestCases.xlsx");
+
+  try {
+    const workbook = xlsx.readFile(filePath);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    const matching = data.find(
+      (row) => row.Title?.toLowerCase() === title.toLowerCase() && row["Default Code (JS)"]
+    );
+
+    if (!matching) {
+      console.log("Available titles:", data.map(row => row.Title));
+      console.log("Requested title:", title);
+      return res.status(404).json({ message: "No default code found for this question." });
+    }
+
+    res.json({ defaultCode: matching["Default Code (JS)"] });
+  } catch (error) {
+    console.error("Error reading default code:", error);
+    res.status(500).json({ message: "Failed to read default code." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   getTestCasesByTitle,
+  getDefaultCodeByTitle,
 };
