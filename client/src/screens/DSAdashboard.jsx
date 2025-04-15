@@ -130,7 +130,7 @@ const Dashboard = () => {
         onDashboard={handleNavigateToDashboard}
       />
 
-      <h1 style={{ textAlign: "center", fontSize: "2.5rem", marginTop: "150px", marginBottom: "30px" }}>
+      <h1 style={{ textAlign: "center", fontSize: "3rem", color: "#fff", marginTop: "140px", marginBottom: "30px", fontWeight: "700" }}>
         {quote}
       </h1>
 
@@ -150,7 +150,21 @@ const Dashboard = () => {
           </thead>
           <tbody>
             {questions.map((q, index) => (
-              <tr key={index}>
+              <tr
+                key={index}
+                style={{
+                  transition: "transform 0.2s ease, background-color 0.2s ease",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.01)";
+                  e.currentTarget.style.backgroundColor = "#2a2a45";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.backgroundColor = "";
+                }}
+              >
                 <td style={tdStyle}>{q.Title}</td>
                 <td style={tdStyle}>{q.Difficulty}</td>
                 <td style={tdStyle}>
@@ -158,6 +172,7 @@ const Dashboard = () => {
                     type="checkbox"
                     checked={q.Revision === "Yes"}
                     onChange={() => handleUpdateQuestion(index, "Revision", q.Revision)}
+                    style={{ cursor: "pointer" }}
                   />
                 </td>
                 <td style={tdStyle}>
@@ -165,29 +180,32 @@ const Dashboard = () => {
                     type="checkbox"
                     checked={q.Important === "Yes"}
                     onChange={() => handleUpdateQuestion(index, "Important", q.Important)}
+                    style={{ cursor: "pointer" }}
                   />
                 </td>
                 <td style={tdStyle}>
                   <button
                     onClick={() => handleUpdateQuestion(index, "Revision", q.Revision)}
                     style={actionBtnStyle1}
+                    title="Toggle Revision"
                   >
                     Toggle Revision
                   </button>
                   <button
                     onClick={() => handleUpdateQuestion(index, "Important", q.Important)}
                     style={actionBtnStyle2}
+                    title="Toggle Important"
                   >
                     Toggle Important
                   </button>
                 </td>
                 <td style={tdStyle}>
-                  <button onClick={() => handleJoinQuestionRoom(q.Title)} style={buttonStyle}>
+                  <button onClick={() => handleJoinQuestionRoom(q.Title)} style={buttonStyle} title="Join public room for this question">
                     Join Room
                   </button>
                 </td>
                 <td style={tdStyle}>
-                  <button onClick={() => handleCreateRoom()} style={buttonStyle}>
+                  <button onClick={() => handleCreateRoom()} style={buttonStyle} title="Create a private room">
                     Create Room
                   </button>
                 </td>
@@ -203,68 +221,73 @@ const Dashboard = () => {
 // --- Styles ---
 
 const buttonStyle = {
-  backgroundColor: "#1a1a1a",
+  backgroundColor: "#6c5ce7",
   padding: "10px 20px",
-  color: "white",
-  border: "1px solid violet",
+  color: "#fff",
+  border: "none",
   borderRadius: "8px",
-  fontWeight: "bold",
+  fontWeight: "600",
   cursor: "pointer",
-  transition: "0.3s",
-  boxShadow: "0 0 8px rgba(138, 43, 226, 0.3)",
+  transition: "all 0.3s ease",
+  boxShadow: "0 2px 10px rgba(108, 92, 231, 0.3)",
+  "&:hover": {
+    backgroundColor: "#5c4dcf",
+  },
 };
 
 const inputStyle = {
-  backgroundColor: "#1a1a1a",
-  color: "white",
-  border: "1px solid violet",
+  backgroundColor: "#1e1e2f",
+  color: "#fff",
+  border: "1px solid #6c5ce7",
   borderRadius: "8px",
   padding: "10px",
   outline: "none",
 };
 
 const tableContainerStyle = {
-  background: "rgba(73, 21, 217, 0.2)",
-  padding: "20px",
-  borderRadius: "12px",
-  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-  backdropFilter: "blur(5px)",
-  WebkitBackdropFilter: "blur(5px)",
-  border: "1px solid rgba(255, 255, 255, 0.3)",
-  marginBottom: "290px",
-  marginTop: "40px",
-  animation: "pulseGlow 3s infinite alternate",
+  background: "#1e1e2f",
+  padding: "30px",
+  borderRadius: "16px",
+  boxShadow: "0 8px 40px rgba(0, 0, 0, 0.3)",
+  border: "1px solid rgba(255, 255, 255, 0.05)",
+  margin: "40px auto",
+  maxWidth: "1200px",
 };
 
 const thStyle = {
-  border: "1px solid #ddd",
-  padding: "8px",
-  color: "white",
+  borderBottom: "2px solid #6c5ce7",
+  padding: "12px",
+  color: "#fff",
+  fontWeight: "600",
+  backgroundColor: "#14142b",
 };
 
 const tdStyle = {
-  border: "1px solid #ddd",
-  padding: "8px",
-  color: "white",
+  padding: "12px",
+  color: "#dcdde1",
+  textAlign: "center",
+  backgroundColor: "#20203a",
 };
 
 const actionBtnStyle1 = {
   marginRight: "10px",
-  padding: "6px",
+  padding: "6px 12px",
   borderRadius: "6px",
   border: "none",
-  background: "#5f27cd",
-  color: "white",
+  background: "#00cec9",
+  color: "#fff",
   cursor: "pointer",
+  transition: "0.3s ease",
 };
 
 const actionBtnStyle2 = {
-  padding: "6px",
+  padding: "6px 12px",
   borderRadius: "6px",
   border: "none",
-  background: "#341f97",
-  color: "white",
+  background: "#e84393",
+  color: "#fff",
   cursor: "pointer",
+  transition: "0.3s ease",
 };
 
 export default Dashboard;
