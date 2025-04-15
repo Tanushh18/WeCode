@@ -4,6 +4,7 @@ const {
   registerUser,
   loginUser,
   logoutUser,
+  getTestCasesByTitle,
 } = require("../controllers/Route.controller");
 const {
   updateQuestion,
@@ -43,6 +44,7 @@ router.get("/follow-dashboard", verifyToken, FollowDashboard);
 router.post("/upload-post", upload.fields([{ name: 'posts', maxCount: 10 }]), verifyToken, postcontroller);
 router.get("/Feed", verifyToken, Feedcontroller);
 
+router.get("/testcases/:title", getTestCasesByTitle);
 
 router.post("/logout", verifyToken, logoutUser);
 

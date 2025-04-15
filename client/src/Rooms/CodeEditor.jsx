@@ -12,18 +12,25 @@ const socket = io(process.env.REACT_APP_SOCKET_URL, {
   autoConnect: false, // Connect manually
 });
 
-const CodeEditor = () => {
-  const {publicRoomId, privateRoomId} = useParams();
-  // const { roomId } = useParams();
-  const editorRef = useRef(null);
+const getLanguageName = (id) => {
+  switch (id) {
+    case 63:
+      return "javascript";
+    case 71:
+      return "python";
+    default:
+      return "javascript";
+  }
+};
 
-  const [value, setValue] = useState(CODE_SNIPPETS["javascript"]);
-  const [language, setLanguage] = useState("javascript");
+const CodeEditor = ({ editorRef, languageId, setLanguageId, defaultLanguageId = 63 }) => {
+  const { publicRoomId, privateRoomId } = useParams();
+  const [value, setValue] = useState(CODE_SNIPPETS[getLanguageName(defaultLanguageId)]);
   const [theme, setTheme] = useState("vs-dark");
 
   // Language selector
   const onSelect = (selectedLang) => {
-    setLanguage(selectedLang);
+    setLanguageId(selectedLang === "javascript" ? 63 : 71);
     setValue(CODE_SNIPPETS[selectedLang]);
   };
 
@@ -33,82 +40,49 @@ const CodeEditor = () => {
     editor.focus();
   };
 
-  // Handle when *this user* edits code
-  // const handleCodeChange = (val) => {
-  //   const currentCode = editorRef.current?.getValue();
-
-  //   if (val !== currentCode) {
-  //     setValue(val);
-  //     if (roomId && socket.connected) {
-  //       socket.emit("code-change", { roomId, code: val });
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (!roomId) return;
-  
-  //   if (!socket.connected) {
-  //     socket.connect();
-  //   }
-  
-  //   socket.emit("join-room", roomId);
-  //   console.log("🔗 Joined room:", roomId);
-  
-  //   // Handle code changes from other users
-  //   const handleIncomingCode = (incomingCode) => {
-  //     const currentCode = editorRef.current?.getValue();
-  //     if (incomingCode !== currentCode) {
-  //       editorRef.current?.setValue(incomingCode);
-  //     }
-  //   };
-  
-  //   socket.on("code-change", handleIncomingCode);
-  
-  //   return () => {
-  //     socket.off("code-change", handleIncomingCode);
-  //     console.log("🧹 Left room:", roomId);
-  //   };
-  // }, [privateRoomId]);
   const [socketConnected, setSocketConnected] = useState(false);
 
-useEffect(() => {
-  if (!privateRoomId) return;
+  useEffect(() => {
+    if (!privateRoomId) return;
 
-  if (!socket.connected) {
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
 
-    socket.on("connect", () => {
-      setSocketConnected(true);
-      console.log("🔌 Connected to socket server");
-      socket.emit("join-room", privateRoomId);
-      console.log("🔗 Joined room:", privateRoomId);
-    });
-  }
+      socket.on("connect", () => {
+        setSocketConnected(true);
+        console.log("🔌 Connected to socket server");
+        socket.emit("join-room", privateRoomId);
+        console.log("🔗 Joined room:", privateRoomId);
+      });
+    }
 
-  // Handle code from others
-  const handleIncomingCode = (incomingCode) => {
-    const currentCode = editorRef.current?.getValue();
-    if (incomingCode !== currentCode) {
-      editorRef.current?.setValue(incomingCode);
+    // Handle code from others
+    const handleIncomingCode = (incomingCode) => {
+      const currentCode = editorRef.current?.getValue();
+      if (incomingCode !== currentCode) {
+        editorRef.current?.setValue(incomingCode);
+      }
+    };
+
+    socket.on("code-change", handleIncomingCode);
+
+    return () => {
+      socket.off("code-change", handleIncomingCode);
+      socket.disconnect();
+      console.log("🧹 Disconnected from socket server");
+    };
+  }, [privateRoomId]);
+
+  const handleCodeChange = (val) => {
+    setValue(val);
+    if (privateRoomId && socketConnected) {
+      socket.emit("code-change", { privateRoomId, code: val });
     }
   };
 
-  socket.on("code-change", handleIncomingCode);
-
-  return () => {
-    socket.off("code-change", handleIncomingCode);
-    socket.disconnect();
-    console.log("🧹 Disconnected from socket server");
-  };
-}, [privateRoomId]);
-  
-const handleCodeChange = (val) => {
-  setValue(val);
-  if (privateRoomId && socketConnected) {
-    socket.emit("code-change", { privateRoomId, code: val });
-  }
-};
+  useEffect(() => {
+    setValue(CODE_SNIPPETS[getLanguageName(languageId)]);
+  }, [languageId]);
 
   return (
     <HStack align="start" spacing={4} p={4}>
@@ -116,9 +90,9 @@ const handleCodeChange = (val) => {
         <Editor
           height="75vh"
           theme={theme}
-          language={language}
+          language={getLanguageName(languageId)}
           value={value}
-          defaultValue={CODE_SNIPPETS[language]}
+          defaultValue={CODE_SNIPPETS[getLanguageName(languageId)]}
           onMount={onMount}
           onChange={handleCodeChange}
           options={{
@@ -130,7 +104,7 @@ const handleCodeChange = (val) => {
         />
 
         <div style={{ display: "flex", marginTop: "16px" }}>
-          <LanguageSelector language={language} onSelect={onSelect} />
+          <LanguageSelector language={getLanguageName(languageId)} onSelect={onSelect} />
           <button
             onClick={() => setTheme(theme === "vs-dark" ? "light" : "vs-dark")}
             style={{

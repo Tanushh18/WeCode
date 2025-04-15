@@ -1,9 +1,10 @@
-import React from "react";
-import { useParams, useLocation  } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
 import Layout from "../Layout1/Layout";
-import { Box, Text } from "@chakra-ui/react";
-
+import { Box, Text, Button, Code } from "@chakra-ui/react";
+import { runCodeWithJudge0 } from "../utils/judge0";
+import axios from "axios";
 
 const CustomRoom = () => {
   const { publicRoomId, privateRoomId } = useParams();
@@ -13,6 +14,51 @@ const CustomRoom = () => {
     
   const isReadOnly = location.state?.isReadOnly || false;
   const fromNavbar = location.state?.fromNavbar || false;
+
+  const [output, setOutput] = useState("");
+  const [languageId, setLanguageId] = useState(63); // Default to JavaScript
+  const [testCases, setTestCases] = useState([]);
+  const [testResults, setTestResults] = useState([]);
+  const editorRef = useRef(null);
+
+  const handleRunCode = async () => {
+    const code = editorRef.current?.getValue();
+    if (!code || !question?.title) {
+      setOutput("Editor is empty or no question loaded.");
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_TESTCASE_API}/${question.title}`);
+      const testCasesFromAPI = res.data;
+      setTestCases(testCasesFromAPI);
+
+      const results = [];
+
+      for (const test of testCasesFromAPI) {
+        const result = await runCodeWithJudge0({
+          source_code: code,
+          language_id: languageId,
+          stdin: test.Input,
+        });
+
+        const output = result.stdout?.trim() || result.stderr?.trim() || "No output";
+        const expected = test["Expected Output"].toString().trim();
+
+        results.push({
+          input: test.Input,
+          expected,
+          output,
+          passed: output === expected,
+        });
+      }
+
+      setTestResults(results);
+    } catch (error) {
+      setOutput("Error running code.");
+      console.error(error);
+    }
+  };
 
   return (
     <Layout>
@@ -27,7 +73,7 @@ const CustomRoom = () => {
           </Text>
         ) : null}
       </Box>
-      {!isReadOnly && !fromNavbar  && <Box display="flex" height="100vh" width="100%" p={4}>
+      {!isReadOnly && !fromNavbar && <Box display="flex" height="100vh" width="100%" p={4}>
         {/* Left side - Room Info and Language Selector */}
         <Box width="50%" pr={4} overflowY="auto" maxHeight="90vh">
           <Text fontSize="2xl" fontWeight="bold" mb={4}>
@@ -42,10 +88,46 @@ const CustomRoom = () => {
 
         {/* Right side - Code Editor */}
         <Box width="50%" height="30%" marginTop={"10px"}>
-          <CodeEditor />
+          <CodeEditor
+            editorRef={editorRef}
+            languageId={languageId}
+            setLanguageId={setLanguageId}
+          />
+          <Button mt={4} colorScheme="blue" onClick={handleRunCode}>
+            Run Code
+          </Button>
+          <Box mt={4}>
+            <Text fontWeight="bold">Output:</Text>
+            <Code whiteSpace="pre-wrap">{output}</Code>
+          </Box>
+          {testResults.length > 0 && (
+            <Box mt={6}>
+              <Text fontWeight="bold" mb={2}>Test Case Results:</Text>
+              <Box as="table" width="100%" border="1px solid #ccc" borderRadius="md">
+                <thead>
+                  <tr>
+                    <th>Input</th>
+                    <th>Expected</th>
+                    <th>Output</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {testResults.map((test, idx) => (
+                    <tr key={idx}>
+                      <td><Code>{test.input}</Code></td>
+                      <td><Code>{test.expected}</Code></td>
+                      <td><Code>{test.output}</Code></td>
+                      <td style={{ color: test.passed ? "green" : "red" }}>
+                        {test.passed ? "✅ Passed" : "❌ Failed"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Box>
+            </Box>
+          )}
         </Box>
-
-       
       </Box>}
     </Layout>
   );

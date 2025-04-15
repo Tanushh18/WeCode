@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
-
+const path = require("path");
+const xlsx = require("xlsx");
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -80,10 +81,32 @@ const logoutUser = async (req, res) => {
     console.error("Logout Error:", error);
     res.status(500).json({ message: "Logout failed." });
   }
-};;
+};
+
+const getTestCasesByTitle = (req, res) => {
+  const title = req.params.title;
+  const filePath = path.join(__dirname, "../../client/public/TestCases.xlsx");
+
+  try {
+    const workbook = xlsx.readFile(filePath);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    const testCases = data.filter((row) => row.Title === title);
+
+    if (testCases.length === 0) {
+      return res.status(404).json({ message: "No test cases found for this question." });
+    }
+
+    res.json(testCases);
+  } catch (error) {
+    console.error("Error reading test cases:", error);
+    res.status(500).json({ message: "Failed to read test cases." });
+  }
+};
 
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
+  getTestCasesByTitle,
 };
