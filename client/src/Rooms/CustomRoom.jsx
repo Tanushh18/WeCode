@@ -15,6 +15,7 @@ const CustomRoom = () => {
     
   const isReadOnly = location.state?.isReadOnly || false;
   const fromNavbar = location.state?.fromNavbar || false;
+  const hideRoomId = location.state?.hideRoomId;
 
   const [output, setOutput] = useState("");
   const [languageId, setLanguageId] = useState(63); // Default to JavaScript
@@ -126,7 +127,8 @@ const CustomRoom = () => {
       <Box width="100%" textAlign="center" mt={6}>
         {publicRoomId ? (
           <Text fontSize="lg" fontWeight="semibold" color="white">
-            Public Room ID: {publicRoomId || "N/A"} || Private Room ID: {privateRoomId || "N/A"}
+            Public Room ID: {publicRoomId || "N/A"} 
+            {!hideRoomId && <> || Private Room ID: {privateRoomId || "N/A"}</>}
           </Text>
         ) : roomId ? (
           <Text fontSize="lg" fontWeight="semibold" color="white">
