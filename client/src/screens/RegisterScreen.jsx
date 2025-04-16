@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { loginWithGoogle } from "../utils/FireBase";
 
 const RegisterUserScreen = () => {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ const RegisterUserScreen = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -116,6 +118,48 @@ const RegisterUserScreen = () => {
           </div>
         )}
       </form>
+
+      <div style={{ marginTop: "15px", textAlign: "center" }}>
+        <button
+          onClick={async () => {
+            if (loading) return;
+            setLoading(true);
+            try {
+              const result = await loginWithGoogle();
+              const idToken = await result.user.getIdToken();
+
+              await axios.post(
+                `${process.env.REACT_APP_GOOGLE_AUTH_URI}`,
+                { idToken },
+                { withCredentials: true }
+              );
+
+              setMessage("Registration successful");
+              navigate("/Feed");
+            } catch (error) {
+              console.error("Firebase Google signup error:", error);
+              setMessage("Google Signup Failed");
+            } finally {
+              setLoading(false);
+            }
+          }}
+          style={{
+            width: "100%",
+            padding: "10px",
+            backgroundColor: "#4285F4",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "16px",
+            fontWeight: "600",
+            marginTop: "10px",
+            cursor: "pointer",
+          }}
+          disabled={loading}
+        >
+          {loading ? "Signing up..." : "Sign up with Google"}
+        </button>
+      </div>
 
       <div
         style={{

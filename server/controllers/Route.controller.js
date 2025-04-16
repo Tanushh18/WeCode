@@ -1,6 +1,14 @@
 const User = require("../models/user.model");
 const path = require("path");
 const xlsx = require("xlsx");
+const admin = require("firebase-admin");
+const serviceAccount = require("../config/firebase-admin.json");
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -129,10 +137,98 @@ const getDefaultCodeByTitle = (req, res) => {
   }
 };
 
+const googleAuth = async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    console.log("Received idToken:", idToken);
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, name, picture } = decodedToken;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        avatar: picture,
+        isGoogleUser: true,
+      });
+      await user.save();
+    }
+
+    const accessToken = user.getAccessToken();
+    const refreshToken = user.getRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    const options = {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    };
+
+    res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .status(200)
+      .json({ message: "Google login successful." });
+
+  } catch (error) {
+    console.error("Firebase Auth Error:", error.message, error.stack);
+    res.status(401).json({ message: "Invalid Firebase ID token" });
+  }
+};
+
+const authenticateUser = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) {
+      return res.status(401).json({ message: "No access token provided" });
+    }
+
+    const user = await User.getUserFromToken(token);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Authentication error:", error);
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+const createRoom = async (req, res) => {
+  try {
+    const { roomName } = req.body;
+    if (!roomName) {
+      return res.status(400).json({ message: "Room name is required." });
+    }
+
+    // Example schema: { name: String, createdBy: ObjectId (User), participants: [] }
+    const Room = require("../models/room.model");
+    const newRoom = new Room({
+      name: roomName,
+      createdBy: req.user._id,
+      participants: [req.user._id],
+    });
+
+    await newRoom.save();
+    res.status(201).json({ message: "Room created successfully", room: newRoom });
+  } catch (error) {
+    console.error("Error creating room:", error);
+    res.status(500).json({ message: "Failed to create room." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   getTestCasesByTitle,
   getDefaultCodeByTitle,
+  googleAuth,
+  authenticateUser,
+  createRoom,
 };

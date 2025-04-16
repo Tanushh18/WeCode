@@ -18,7 +18,9 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: true
+      required: function () {
+        return !this.isGoogleUser;
+      },
     },
     refreshToken: {
       type: String
@@ -94,7 +96,11 @@ const userSchema = mongoose.Schema(
           default: ""
         }
       }
-    ]
+    ],
+    isGoogleUser: {
+      type: Boolean,
+      default: false,
+    }
     
   },
   {

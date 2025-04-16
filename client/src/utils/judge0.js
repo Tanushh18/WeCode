@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const JUDGE0_API = "https://judge0-ce.p.rapidapi.com";
-const RAPID_API_KEY = "c515b41611msh4acd44ec9c913a4p1266dbjsn33e33477f36d";
+// Load values from your .env file
+const JUDGE0_API = process.env.REACT_APP_JUDGE0_API;
+const RAPID_API_KEY = process.env.REACT_APP_RAPID_API_KEY;
+const RAPID_API_HOST = process.env.REACT_APP_RAPID_API_HOST;
 
 export const runCodeWithJudge0 = async ({ source_code, language_id, stdin = "" }) => {
   try {
@@ -16,11 +18,10 @@ export const runCodeWithJudge0 = async ({ source_code, language_id, stdin = "" }
         headers: {
           "Content-Type": "application/json",
           "X-RapidAPI-Key": RAPID_API_KEY,
-          "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          "X-RapidAPI-Host": RAPID_API_HOST,
         },
       }
     );
-      
 
     return submissionRes.data;
   } catch (error) {

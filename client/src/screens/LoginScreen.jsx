@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { loginWithGoogle } from "../utils/FireBase";
 
 const LoginScreen = () => {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [serverStatus, setServerStatus] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -155,6 +157,48 @@ const LoginScreen = () => {
               Sign in
             </button>
           </form>
+
+          <div style={{ marginTop: "15px", textAlign: "center" }}>
+            <button
+              onClick={async () => {
+                if (loading) return;
+                setLoading(true);
+                try {
+                  const result = await loginWithGoogle();
+                  const idToken = await result.user.getIdToken();
+
+                  await axios.post(
+                    `${process.env.REACT_APP_GOOGLE_AUTH_URI}`,
+                    { idToken },
+                    { withCredentials: true }
+                  );
+
+                  setMessage("Login successful");
+                  navigate("/Feed");
+                } catch (error) {
+                  console.error("Firebase Google login error:", error);
+                  setMessage("Google Login Failed");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "10px",
+                backgroundColor: "#4285F4",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontWeight: "600",
+                marginTop: "10px",
+                cursor: "pointer",
+              }}
+            >
+              {loading ? "Signing in..." : "Sign in with Google"}
+            </button>
+          </div>
         </div>
 
         <div

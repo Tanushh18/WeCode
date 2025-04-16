@@ -6,6 +6,7 @@ const {
   logoutUser,
   getTestCasesByTitle,
   getDefaultCodeByTitle,
+  googleAuth,
 } = require("../controllers/Route.controller");
 const {
   updateQuestion,
@@ -49,5 +50,6 @@ router.get("/testcases/:title", getTestCasesByTitle);
 router.get("/testcases/default/:title", getDefaultCodeByTitle);
 
 router.post("/logout", verifyToken, logoutUser);
+router.post("/auth/google", googleAuth);
 
 module.exports = router; // Export router
