@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 const path = require("path");
 const xlsx = require("xlsx");
 const admin = require("firebase-admin");
-const serviceAccount = require("../config/firebase-admin.json");
+const serviceAccount = require("../config/firebase-admin");
 
 if (!admin.apps.length) {
   admin.initializeApp({
