@@ -5,6 +5,7 @@ import Layout from "../Layout1/Layout";
 import { Box, Text, Button, Code } from "@chakra-ui/react";
 import { runCodeWithJudge0 } from "../utils/judge0";
 import axios from "axios";
+import { problemHandlers } from "./HandlerQuestions";
 
 const CustomRoom = () => {
   const { publicRoomId, privateRoomId } = useParams();
@@ -62,8 +63,33 @@ const CustomRoom = () => {
       const results = [];
 
       for (const test of testCasesFromAPI) {
+        const inputStr = test.Input; // e.g., "nums = [2,7,11,15], target = 9"
+
+        const title = question.title?.toLowerCase();
+        const handlerKey = Object.keys(problemHandlers).find(key =>
+          title.includes(key)
+        );
+
+        if (!handlerKey) {
+          console.warn("⚠️ No handler found for title:", title);
+          continue;
+        }
+
+        let fullCode = "";
+        try {
+          if (!inputStr || typeof inputStr !== "string") throw new Error("Missing input string");
+          fullCode = problemHandlers[handlerKey](inputStr, code);
+        } catch (err) {
+          console.warn("⚠️ Error while preparing code:", err.message);
+          continue;
+        }
+
+        console.log("🔧 Running test case with:");
+        console.log("Source code:", fullCode);
+        console.log("Language ID:", languageId);
+
         const result = await runCodeWithJudge0({
-          source_code: code,
+          source_code: fullCode,
           language_id: languageId,
           stdin: "",
         });
@@ -71,11 +97,20 @@ const CustomRoom = () => {
         const output = result.stdout?.trim() || result.stderr?.trim() || "No output";
         const expected = test["Expected Output"].toString().trim();
 
+        let passed = false;
+        try {
+          const parsedOutput = JSON.stringify(eval(output));
+          const parsedExpected = JSON.stringify(eval(expected));
+          passed = parsedOutput === parsedExpected;
+        } catch (err) {
+          console.warn("⚠️ Could not parse output/expected:", output, expected);
+        }
+
         results.push({
           input: test.Input,
           expected,
           output,
-          passed: output === expected,
+          passed,
         });
       }
 

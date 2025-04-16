@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const JUDGE0_API = "https://judge0-ce.p.rapidapi.com";
-const RAPID_API_KEY = "d20449a8fbmsha0496d720d5fb14p154886jsn776a911a71a4";
+const RAPID_API_KEY = "c515b41611msh4acd44ec9c913a4p1266dbjsn33e33477f36d";
 
 export const runCodeWithJudge0 = async ({ source_code, language_id, stdin = "" }) => {
   try {
@@ -24,7 +24,7 @@ export const runCodeWithJudge0 = async ({ source_code, language_id, stdin = "" }
 
     return submissionRes.data;
   } catch (error) {
-    console.error("❌ Error submitting code to Judge0:", error);
+    console.error("❌ Error submitting code to Judge0:", error.response?.data || error.message);
     throw error;
   }
 };
