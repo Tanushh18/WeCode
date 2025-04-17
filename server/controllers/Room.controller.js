@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
 const Room = require("../models/Room.model");
-
 const User = require("../models/user.model");
 // const { server } = require("socket.io");
 
