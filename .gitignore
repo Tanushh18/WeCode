@@ -1,47 +1,47 @@
-# Node modules
-node_modules/
+# # Node modules
+# node_modules/
 
-# Environment variables
-client/.env
-server/.env
+# # Environment variables
+# client/.env
+# server/.env
 
-# Firebase service account file
-server/config/firebase.js
+# # Firebase service account file
+# server/config/firebase.js
 
-# Logs
-logs
-*.log
-npm-debug.log*
+# # Logs
+# logs
+# *.log
+# npm-debug.log*
 
-# OS and IDE settings
-.DS_Store
-.vscode/
+# # OS and IDE settings
+# .DS_Store
+# .vscode/
 
-# Build output
-build/
-dist/
-server/node_modules/
+# # Build output
+# build/
+# dist/
+# server/node_modules/
 
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-client/node_modules/
-client/.pnp
-client/.pnp.js
+# # dependencies
+# client/node_modules/
+# client/.pnp
+# client/.pnp.js
 
-# testing
-client/coverage
+# # testing
+# client/coverage
 
-# production
-client/build
+# # production
+# client/build
 
-# misc
-client/.DS_Store
-client/.env.local
-client/.env.development.local
-client/.env.test.local
-client/.env.production.local
+# # misc
+# client/.DS_Store
+# client/.env.local
+# client/.env.development.local
+# client/.env.test.local
+# client/.env.production.local
 
-client/npm-debug.log*
-client/yarn-debug.log*
-client/yarn-error.log*
+# client/npm-debug.log*
+# client/yarn-debug.log*
+# client/yarn-error.log*
