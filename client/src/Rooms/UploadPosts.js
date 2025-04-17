@@ -26,7 +26,7 @@ const UploadPosts = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:2000/upload-post",
+        process.env.REACT_APP_UPLOAD_POST_URI,
         formData,
         {
           headers: {
