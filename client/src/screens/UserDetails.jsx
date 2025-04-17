@@ -11,6 +11,7 @@ const UserDetails = () => {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bio, setBio] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const [userPosts, setUserPosts] = useState([]);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -18,6 +19,8 @@ const UserDetails = () => {
   const [following_name, setFollowing_name] = useState([]);
   const [showFollowersPopup, setShowFollowersPopup] = useState(false);
   const [showFollowingPopup, setShowFollowingPopup] = useState(false);
+  
+  
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -30,6 +33,7 @@ const UserDetails = () => {
         setName(data.name || "");
         setEmail(data.email || "");
         setBio(data.bio || "");
+        setProfileImage(data.profileimage || "");
         setUserPosts(data.posts || []);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -83,7 +87,7 @@ const UserDetails = () => {
       <div style={{ padding: "2rem", backgroundColor: "#000", color: "#fff", marginBottom: "2rem", fontFamily: "sans-serif", display: "flex", justifyContent: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "3rem", maxWidth: "900px", width: "100%", backgroundColor: "#111", padding: "2rem", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
           <img
-            src={`https://api.dicebear.com/7.x/micah/svg?seed=${name}`}
+            src={profileImage && profileImage.trim() !== "" ? profileImage : `https://api.dicebear.com/7.x/micah/svg?seed=${name}`}
             alt="Profile"
             style={{ borderRadius: "50%", width: "150px", height: "150px", objectFit: "cover", border: "3px solid #8a2be2" }}
           />

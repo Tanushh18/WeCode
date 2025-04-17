@@ -100,6 +100,25 @@ const UnfollowUser = async (req, res) => {
   }
 }
 
+const SearchUser = async (req, res) => {
+  const { searchQuery } = req.query;
+
+  if (!searchQuery || searchQuery.trim() === "") {
+    return res.status(400).json({ message: "Search query is required." });
+  }
+
+  try {
+    const users = await User.find({
+      name: { $regex: searchQuery.trim(), $options: "i" }
+    }).select("name");
+
+    return res.status(200).json({ users });
+  } catch (error) {
+    console.error("❌ Error in SearchUser:", error);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
+
 const FollowDashboard = async (req, res) => {
   try {
     const following_count = await Follow.countDocuments({ following_id: req.user._id });
@@ -113,4 +132,4 @@ const FollowDashboard = async (req, res) => {
   }
 }
 
-module.exports = { FollowUser ,CheckFollowing, UnfollowUser , FollowDashboard };
+module.exports = { FollowUser ,CheckFollowing, UnfollowUser, SearchUser , FollowDashboard };

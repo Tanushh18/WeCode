@@ -16,7 +16,9 @@ const UserUpdateDetails = () => {
   const [goals, setGoals] = useState("");
   const [github, setGithub] = useState("");
   const [linkedin, setLinkedin] = useState("");
-  const [message, setMessage] = React.useState("");
+const [profileImage, setProfileImage] = useState("");
+const [profileImageFile, setProfileImageFile] = useState(null);
+const [message, setMessage] = React.useState("");
 
   // Follower and following counts
   const [followingCount, setFollowingCount] = useState(0);
@@ -58,40 +60,52 @@ const UserUpdateDetails = () => {
     fetchFollowCounts();
   }, []);
 
-  const Updateprofile = (e) => {
-    e.preventDefault();
-    axios
-      .post(
-        process.env.REACT_APP_USER_UPDATE_PROFILE,
-        {
-          name,
-          email,
-          password,
-          phone,
-          bio,
-          goals,
-          github,
-          linkedin,
+const handleProfileImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setProfileImageFile(file);
+    setProfileImage(URL.createObjectURL(file)); // Optional preview
+  }
+};
+
+const Updateprofile = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("email", email);
+  formData.append("password", password);
+  formData.append("phone", phone);
+  formData.append("bio", bio);
+  formData.append("goals", goals);
+  formData.append("github", github);
+  formData.append("linkedin", linkedin);
+  if (profileImageFile) {
+    formData.append("profileImage", profileImageFile);
+  }
+
+  try {
+    const response = await axios.post(
+      process.env.REACT_APP_USER_UPDATE_PROFILE,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-        {
-          withCredentials: true,
-        }
-      )
-      .then((res) => {
-        setMessage("Data Updated Successfully");
-      })
-      .catch((err) => {
-        if (err.response && err.response.data && err.response.data.message) {
-          if (err.response.data.message === "Username already taken.") {
-            setMessage("Username already taken.");
-          } else {
-            setMessage(err.response.data.message);
-          }
-        } else {
-          setMessage("An error occurred while updating.");
-        }
-      });
-  };
+        withCredentials: true,
+      }
+    );
+
+    setMessage("Data Updated Successfully");
+  } catch (error) {
+    console.error("Upload error:", error);
+    if (error.response && error.response.data && error.response.data.message) {
+      setMessage(error.response.data.message);
+    } else {
+      setMessage("An error occurred while updating.");
+    }
+  }
+};
 
   const handleLogoutClick = () => {
     setshowmenu(false);
@@ -190,6 +204,13 @@ const UserUpdateDetails = () => {
             style={inputStyle}
             value={linkedin}
             onChange={(e) => setLinkedin(e.target.value)}
+          />
+          <input
+            type="file"
+            name="profileimage"
+            accept="image/*"
+            onChange={handleProfileImageChange}
+            style={inputStyle}
           />
           <button type="submit" onClick={Updateprofile} style={buttonStyle}>
             Update Profile

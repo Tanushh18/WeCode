@@ -26,6 +26,10 @@ const updateuserprofile = async (req, res) => {
       }
   
       // List of allowed fields to update
+      if (req.file) {
+        const uploaded = await uploadoncloudinary(req.file.path);
+        user.profileimage = uploaded.url;
+      }
       const { name, phone, bio, goals, github, linkedin } = req.body;
       const originalName = user.name;
   
@@ -66,8 +70,39 @@ const updateuserprofile = async (req, res) => {
       console.error("Error updating profile:", error);
       return res.status(500).json({ message: "An error occurred.", error });
     }
-  };
+};
+
+const { uploadoncloudinary } = require("../config/FileHandling");
+
+const uploadProfileImage = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const image = req.file;
+    if (!image) {
+      return res.status(400).json({ message: "No profile image provided." });
+    }
+
+    const uploaded = await uploadoncloudinary(image.path);
+    user.profileimage = uploaded.url;
+
+    await user.save();
+
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    return res.status(200).json({
+      message: "Profile image uploaded successfully.",
+      user: userWithoutPassword
+    });
+  } catch (error) {
+    console.error("Error uploading profile image:", error);
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+};
 
 module.exports = {
-    fetchuserprofile , updateuserprofile
+    fetchuserprofile, updateuserprofile, uploadProfileImage
 }

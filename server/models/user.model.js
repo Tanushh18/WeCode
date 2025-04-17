@@ -7,6 +7,11 @@ require("dotenv").config(); // ✅ Load env vars properly
 
 const userSchema = mongoose.Schema(
   {
+    profileimage: {
+      type: String,
+      default: "",
+      
+    },
     name: {
       type: String,
       required: true,

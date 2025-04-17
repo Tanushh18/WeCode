@@ -20,7 +20,7 @@ const {
 const { CreateRoom , joinRoom } = require("../controllers/Room.controller");
 
 const { verifyToken } = require("../middleware/auth");
-const { FollowUser ,CheckFollowing, FollowDashboard, UnfollowUser } = require("../controllers/Follow.controller");
+const { FollowUser ,CheckFollowing, FollowDashboard,SearchUser, UnfollowUser } = require("../controllers/Follow.controller");
 const multer = require("multer");
 const { postcontroller , Feedcontroller } = require("../controllers/post.controller");
 
@@ -36,7 +36,7 @@ router.post("/login", loginUser);
 router.post("/questions_update", verifyToken, updateQuestion);
 router.get("/fetch_dashboard", verifyToken, fetchquestion);
 router.get("/userprofile", verifyToken, fetchuserprofile);
-router.post("/user_update_profile", verifyToken, updateuserprofile);
+router.post("/user_update_profile", upload.single("profileImage"), verifyToken, updateuserprofile);
 router.get("/create_room", verifyToken, CreateRoom);
 router.post("/join_room", verifyToken, joinRoom);
 router.post("/follow", verifyToken, FollowUser);
@@ -45,6 +45,7 @@ router.post("/check-following", verifyToken, CheckFollowing);
 router.get("/follow-dashboard", verifyToken, FollowDashboard);
 router.post("/upload-post", upload.fields([{ name: 'posts', maxCount: 10 }]), verifyToken, postcontroller);
 router.get("/Feed", verifyToken, Feedcontroller);
+router.get("/SearchUser", verifyToken, SearchUser);
 
 router.get("/testcases/:title", getTestCasesByTitle);
 router.get("/testcases/default/:title", getDefaultCodeByTitle);
