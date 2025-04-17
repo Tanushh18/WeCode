@@ -64,7 +64,7 @@ const CustomRoom = () => {
       const results = [];
 
       for (const test of testCasesFromAPI) {
-        const inputStr = test.Input; // e.g., "nums = [2,7,11,15], target = 9"
+        let inputStr = test.Input; // e.g., "nums = [2,7,11,15], target = 9"
 
         const title = question.title?.toLowerCase();
         const handlerKey = Object.keys(problemHandlers).find(key =>
@@ -74,6 +74,33 @@ const CustomRoom = () => {
         if (!handlerKey) {
           console.warn("⚠️ No handler found for title:", title);
           continue;
+        }
+
+        // Flexible parsing for Word Ladder input format
+        if (handlerKey === "word ladder") {
+          let beginWord, endWord, wordList;
+
+          try {
+            // Try format: hit\ncog\n['hot','dot','dog']
+            const lines = inputStr.trim().split("\n");
+            if (lines.length === 3) {
+              beginWord = lines[0].trim();
+              endWord = lines[1].trim();
+              wordList = JSON.parse(lines[2].replace(/'/g, '"'));
+            } else {
+              // Fallback to old format parsing
+              const matches = inputStr.match(/beginWord\s*=\s*'(\w+)',\s*endWord\s*=\s*'(\w+)',\s*wordList\s*=\s*\[([^\]]+)\]/i);
+              if (!matches) throw new Error("Invalid input for Word Ladder");
+
+              beginWord = matches[1];
+              endWord = matches[2];
+              wordList = matches[3].split(',').map(word => word.trim().replace(/['"]/g, ''));
+            }
+
+            inputStr = JSON.stringify({ beginWord, endWord, wordList });
+          } catch (err) {
+            throw new Error("Invalid input for Word Ladder");
+          }
         }
 
         let fullCode = "";

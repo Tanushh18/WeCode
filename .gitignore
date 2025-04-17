@@ -1,0 +1,21 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Firebase service account file
+server/config/firebase.js
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS and IDE settings
+.DS_Store
+.vscode/
+
+# Build output
+build/
+dist/
