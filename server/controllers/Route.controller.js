@@ -51,8 +51,8 @@ const loginUser = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "None",
     };
     
     res
@@ -82,8 +82,8 @@ const logoutUser = async (req, res) => {
 
     // Clear cookies
     res
-      .clearCookie("accessToken", { httpOnly: true, secure: false, sameSite: "lax" })
-      .clearCookie("refreshToken", { httpOnly: true, secure: false, sameSite: "lax" })
+      .clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" })
+      .clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" })
       .status(200)
       .json({ message: "Logout successful." });
   } catch (error) {
@@ -164,8 +164,8 @@ const googleAuth = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "None",
     };
 
     res
