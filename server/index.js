@@ -18,12 +18,12 @@ app.use(cookieparser());
 db();
 
 // Middleware
-app.use(
-  cors({
-    origin: "https://wecode-2.onrender.com", // Frontend URL
-    credentials: true, // This allows cookies to be sent
-  })
-);
+
+app.use(cors({
+  origin: 'https://wecode-2.onrender.com', // allow your front-end origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // if you're using cookies/sessions
+}));
 app.use(express.json());
 
 // Routes
