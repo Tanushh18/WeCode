@@ -1,4 +1,5 @@
 require("dotenv").config();
+const allowedOrigins = process.env.CORS_ORIGINS?.split(",") || [];
 const express = require("express");
 const db = require("./config/db");
 const cors = require("cors");
@@ -20,7 +21,7 @@ db();
 // Middleware
 
 app.use(cors({
-  origin: 'https://wecode-2.onrender.com', // allow your front-end origin
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true // if you're using cookies/sessions
 }));

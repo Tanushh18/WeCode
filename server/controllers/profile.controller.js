@@ -27,6 +27,7 @@ const updateuserprofile = async (req, res) => {
   
       // List of allowed fields to update
       const { name, phone, bio, goals, github, linkedin } = req.body;
+      const originalName = user.name;
   
       // Update fields
       user.name = name || user.name;
@@ -36,7 +37,22 @@ const updateuserprofile = async (req, res) => {
       user.github = github || user.github;
       user.linkedin = linkedin || user.linkedin;
   
-      await user.save();
+      // Check if the new username already exists (and is not the current user)
+      if (name && name !== originalName) {
+        const existingUser = await User.findOne({ name });
+        if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+          return res.status(400).json({ message: "Username already taken." });
+        }
+      }
+
+      try {
+        await user.save();
+      } catch (err) {
+        if (err.code === 11000 && err.keyPattern?.name) {
+          return res.status(400).json({ message: "Username already taken." });
+        }
+        throw err;
+      }
   
       // Exclude password in response
       const { password, ...userWithoutPassword } = user.toObject();

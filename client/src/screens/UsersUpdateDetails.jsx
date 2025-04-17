@@ -81,7 +81,15 @@ const UserUpdateDetails = () => {
         setMessage("Data Updated Successfully");
       })
       .catch((err) => {
-        console.log(err);
+        if (err.response && err.response.data && err.response.data.message) {
+          if (err.response.data.message === "Username already taken.") {
+            setMessage("Username already taken.");
+          } else {
+            setMessage(err.response.data.message);
+          }
+        } else {
+          setMessage("An error occurred while updating.");
+        }
       });
   };
 
@@ -186,7 +194,11 @@ const UserUpdateDetails = () => {
           <button type="submit" onClick={Updateprofile} style={buttonStyle}>
             Update Profile
           </button>
-          {message && <p style={{ color: "green" }}>{message}</p>}
+          {message && (
+            <p style={{ color: message === "Username already taken." ? "red" : "green" }}>
+              {message}
+            </p>
+          )}
         </form>
 
         <div style={{ marginTop: "20px", color: "white" }}>

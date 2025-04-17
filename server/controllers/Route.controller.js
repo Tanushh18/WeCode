@@ -15,15 +15,23 @@ const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    const existinguser = await User.findOne({ email });
-    if (existinguser) {
-      return res.status(400).json({ message: "User already exists" });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+
+    const existingName = await User.findOne({ name });
+    if (existingName) {
+      return res.status(400).json({ message: "Username already taken." });
     }
 
     const user = new User({ name, email, password });
     await user.save();
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
+    if (error.code === 11000 && error.keyPattern?.name) {
+      return res.status(400).json({ message: "Username must be unique." });
+    }
     console.error(error);
     res.status(500).json({ message: "Registration failed." });
   }
@@ -148,8 +156,15 @@ const googleAuth = async (req, res) => {
 
     let user = await User.findOne({ email });
     if (!user) {
+      let uniqueName = name;
+      let count = 1;
+      while (await User.findOne({ name: uniqueName })) {
+        uniqueName = `${name}${count}`;
+        count++;
+      }
+
       user = new User({
-        name,
+        name: uniqueName,
         email,
         avatar: picture,
         isGoogleUser: true,

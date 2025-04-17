@@ -1,9 +1,11 @@
+require("dotenv").config();
+const allowedOrigins = process.env.CORS_ORIGINS?.split(",") || [];
 const { Server } = require("socket.io");
 
 const setupSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "https://wecode-2.onrender.com",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true
     }

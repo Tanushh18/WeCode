@@ -40,7 +40,7 @@ router.post("/user_update_profile", verifyToken, updateuserprofile);
 router.get("/create_room", verifyToken, CreateRoom);
 router.post("/join_room", verifyToken, joinRoom);
 router.post("/follow", verifyToken, FollowUser);
-router.post("/Unfollow", verifyToken, UnfollowUser);
+router.post("/unfollow", verifyToken, UnfollowUser);
 router.post("/check-following", verifyToken, CheckFollowing);
 router.get("/follow-dashboard", verifyToken, FollowDashboard);
 router.post("/upload-post", upload.fields([{ name: 'posts', maxCount: 10 }]), verifyToken, postcontroller);
