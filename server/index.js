@@ -18,10 +18,21 @@ app.use(cookieparser());
 db();
 
 // Middleware
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://wecode-2.onrender.com"
+];
+
 app.use(
   cors({
-    origin: "https://wecode-2.onrender.com", // Frontend URL
-    credentials: true, // This allows cookies to be sent
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 app.use(express.json());
