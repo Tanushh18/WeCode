@@ -20,7 +20,7 @@ db();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: "https://wecode-2.onrender.com", // Frontend URL
     credentials: true, // This allows cookies to be sent
   })
 );
