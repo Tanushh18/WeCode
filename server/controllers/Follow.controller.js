@@ -110,7 +110,7 @@ const SearchUser = async (req, res) => {
   try {
     const users = await User.find({
       name: { $regex: searchQuery.trim(), $options: "i" }
-    }).select("name");
+    }).select("name profileimage" );
 
     return res.status(200).json({ users });
   } catch (error) {
@@ -123,8 +123,8 @@ const FollowDashboard = async (req, res) => {
   try {
     const following_count = await Follow.countDocuments({ following_id: req.user._id });
     const followed_count = await Follow.countDocuments({ followed_id: req.user._id });
-    const Followers_user_names = await Follow.find({ followed_id: req.user._id }).populate("following_id", "name");
-    const Following_user_names = await Follow.find({ following_id: req.user._id }).populate("followed_id", "name");
+    const Followers_user_names = await Follow.find({ followed_id: req.user._id }).populate("following_id", "name profileimage");
+    const Following_user_names = await Follow.find({ following_id: req.user._id }).populate("followed_id", "name profileimage");
     return res.status(200).json({ following_count, followed_count , Followers_user_names, Following_user_names });
   } catch (error) {
     console.error("❌ Error in FollowDashboard:", error);

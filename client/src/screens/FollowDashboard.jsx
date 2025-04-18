@@ -16,6 +16,7 @@ const FollowDashboard = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const dropdownRef = useRef(null);
+  const [profileimage, setProfileimage] = useState("");
 
   const [recentSearches, setRecentSearches] = useState([]);
 
@@ -190,7 +191,8 @@ const FollowDashboard = () => {
                     key={user._id}
                 onClick={() => {
                       setFollowedName(user.name);
-                      setSelectedUser(user);
+                  setSelectedUser(user);
+                  setProfileimage(user.profileimage);
                       setShowProfile(true);
                       setSearchResults([]);
                       setRecentSearches((prev) => {
@@ -252,7 +254,11 @@ const FollowDashboard = () => {
               }}
             >
               <img
-                src={`https://api.dicebear.com/7.x/micah/svg?seed=${user.name}`}
+                src={
+                  user.profileimage
+                    ? user.profileimage
+                    : `https://api.dicebear.com/7.x/micah/svg?seed=${user.name}`
+                }
                 alt={user.name}
                 style={{ width: "60px", borderRadius: "50%", marginBottom: "0.5rem" }}
               />
@@ -261,6 +267,7 @@ const FollowDashboard = () => {
                 onClick={() => {
                   setFollowedName(user.name);
                   setSelectedUser(user);
+                  setProfileimage(user.profileimage);
                   setShowProfile(true);
                   setRecentSearches([]);
                   checkFollowingStatus();
@@ -299,7 +306,11 @@ const FollowDashboard = () => {
           style={{ display: "flex", alignItems: "center",marginTop: "2.5rem", gap: "3rem", marginBottom: "2rem" }}
         >
           <img
-            src={`https://api.dicebear.com/7.x/micah/svg?seed=${selectedUser.name}`}
+            src={
+              profileimage
+                ? profileimage
+                : `https://api.dicebear.com/7.x/micah/svg?seed=${selectedUser.name}`
+            }
             alt="Profile"
             style={{ borderRadius: "50%", width: "150px", height: "150px", objectFit: "cover" }}
           />
