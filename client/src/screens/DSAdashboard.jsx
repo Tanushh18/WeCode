@@ -79,7 +79,7 @@ const Dashboard = () => {
   
       const publicRoomId = slugify(question.Title);
       console.log("Navigating to room...");
-navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
+      navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
         state: {
           question: {
             title: question.Title,
@@ -90,7 +90,7 @@ navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
             constraints: question.Constraints,
           },
         },
-});
+      });
     } catch (error) {
       const errMsg = error?.response?.data?.message;
   
@@ -187,7 +187,15 @@ navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
         onDashboard={handleNavigateToDashboard}
       />
 
-      <h1 style={{ textAlign: "center", fontSize: "3rem", color: "#fff", marginTop: "140px", marginBottom: "30px", fontWeight: "700" }}>
+      <h1 style={{
+        textAlign: "center",
+        fontSize: "3rem",
+        color: "#00cec9",
+        marginTop: "120px",
+        marginBottom: "40px",
+        fontWeight: "800",
+        textShadow: "0 0 10px #00cec9"
+      }}>
         {quote}
       </h1>
 
@@ -211,16 +219,17 @@ navigate(`/customroom/${publicRoomId}/${privateRoomId}` , {
               <tr
                 key={index}
                 style={{
-                  transition: "transform 0.2s ease, background-color 0.2s ease",
+                  backgroundColor: index % 2 === 0 ? "#2c2c54" : "#3d3d70",
+                  transition: "all 0.3s ease-in-out",
                   cursor: "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "scale(1.01)";
-                  e.currentTarget.style.backgroundColor = "#2a2a45";
+                  e.currentTarget.style.backgroundColor = "#3f3f7f";
+                  e.currentTarget.style.boxShadow = "0 0 12px #00cec9";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.backgroundColor = "";
+                  e.currentTarget.style.backgroundColor = index % 2 === 0 ? "#2c2c54" : "#3d3d70";
+                  e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 <td style={tdStyle}>{q.Title}</td>
@@ -290,9 +299,10 @@ const buttonStyle = {
   cursor: "pointer",
   transition: "all 0.3s ease",
   boxShadow: "0 2px 10px rgba(108, 92, 231, 0.3)",
-  "&:hover": {
-    backgroundColor: "#5c4dcf",
-  },
+  transform: "scale(1)",
+  ":hover": {
+    transform: "scale(1.05)",
+  }
 };
 
 const inputStyle = {
@@ -305,39 +315,49 @@ const inputStyle = {
 };
 
 const tableContainerStyle = {
-  background: "#1e1e2f",
-  padding: "30px",
-  borderRadius: "16px",
-  boxShadow: "0 8px 40px rgba(0, 0, 0, 0.3)",
+  background: "linear-gradient(145deg, #1c1c2b, #22223a)",
+  padding: "40px",
+  borderRadius: "18px",
+  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
   border: "1px solid rgba(255, 255, 255, 0.05)",
-  margin: "40px auto",
-  maxWidth: "1200px",
+  margin: "60px auto",
+  maxWidth: "1300px",
 };
 
 const thStyle = {
-  borderBottom: "2px solid #6c5ce7",
-  padding: "12px",
-  color: "#fff",
-  fontWeight: "600",
-  backgroundColor: "#14142b",
+  padding: "14px",
+  color: "#ffffff",
+  background: "linear-gradient(90deg, #a29bfe, #00cec9)",
+  textShadow: "0 0 8px #00cec9",
+  borderBottom: "2px solid #ffffff33",
+  fontWeight: "700",
+  borderRadius: "6px"
 };
 
 const tdStyle = {
-  padding: "12px",
-  color: "#dcdde1",
+  padding: "14px",
+  color: "#ecf0f1",
   textAlign: "center",
   backgroundColor: "#20203a",
+  borderRadius: "8px",
+  transition: "background 0.3s, transform 0.2s",
 };
 
 const actionBtnStyle1 = {
   marginRight: "10px",
-  padding: "6px 12px",
-  borderRadius: "6px",
+  padding: "8px 14px",
+  borderRadius: "8px",
   border: "none",
-  background: "#00cec9",
+  background: "linear-gradient(45deg, #00cec9, #0984e3)",
   color: "#fff",
+  fontWeight: "600",
   cursor: "pointer",
   transition: "0.3s ease",
+  boxShadow: "0 2px 10px rgba(0,206,201,0.5)",
+  transform: "scale(1)",
+  ":hover": {
+    transform: "scale(1.05)",
+  }
 };
 
 const actionBtnStyle2 = {

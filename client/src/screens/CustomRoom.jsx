@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import CodeEditor from "./CodeEditor";
+import CodeEditor from "../Rooms/CodeEditor";
 import Layout from "../Layout1/Layout";
 import { Box, Text, Button, Code } from "@chakra-ui/react";
 import { runCodeWithJudge0 } from "../utils/judge0";
 import axios from "axios";
-import { problemHandlers } from "./HandlerQuestions";
+import { problemHandlers } from "../Rooms/HandlerQuestions";
 
 const CustomRoom = () => {
   const { publicRoomId, privateRoomId } = useParams();

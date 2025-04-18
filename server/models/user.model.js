@@ -75,6 +75,10 @@ const userSchema = mongoose.Schema(
             type: Boolean,
             default: false,
           },
+          timestamps: {
+            type: Date,
+            default: Date.now,
+          },
         }
       ],
       default: [],

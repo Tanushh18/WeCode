@@ -4,13 +4,14 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import Dashboard from "./screens/DSAdashboard";
 import UserDetails from "./screens/UserDetails";
-import CustomRoom from "./Rooms/CustomRoom";
+import CustomRoom from "./screens/CustomRoom";
 import Livechatroom from "./Rooms/livechatroom";
 import FollowDashboard from "./screens/FollowDashboard";
 import UserUpdateDetails from "./screens/UsersUpdateDetails";
 import Feed from "./screens/Feed";
 import "./App.css";
-import UploadPosts from "./Rooms/UploadPosts";
+import UploadPosts from "./screens/UploadPosts";
+import SolvedProblemsList from "./screens/solvedproblemslist";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/questionroom/:publicroomID" element={<Livechatroom />} />
         <Route path="/Feed" element={<Feed />} />
         <Route path="/customroom/:publicRoomId/:privateRoomId" element={<CustomRoom />} />
+        <Route path="/solvedproblemslist" element={<SolvedProblemsList />} />
       </Routes>
     </Router>
   );
