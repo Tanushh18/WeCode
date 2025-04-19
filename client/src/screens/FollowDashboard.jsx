@@ -46,6 +46,10 @@ const FollowDashboard = () => {
     
   // Check if the user is already following the followed user
   const checkFollowingStatus = async () => {
+    if (!followingName || !followedName) {
+      console.warn("Missing names: skipping follow check");
+      return;
+    }
     try {
       const response = await axios.post(
         process.env.REACT_APP_CHECK_FOLLOWING,
@@ -111,8 +115,9 @@ const FollowDashboard = () => {
           `${process.env.REACT_APP_SEARCH_USERS}?searchQuery=${query}`,
           { withCredentials: true }
         );
-        console.log("Search Results:", res.data.users);
-        setSearchResults(res.data.users);
+        const users = res.data?.users || [];
+        console.log("Search Results:", users);
+        setSearchResults(users);
       } catch (error) {
         console.error("Error searching users:", error);
       }
@@ -168,7 +173,9 @@ const FollowDashboard = () => {
             }}
           />
           <AnimatePresence>
-            {searchResults.length > 0 && (
+            {!searchResults || searchResults.length === 0 ? (
+              <p style={{ color: "#ccc" }}>No users found</p>
+            ) : (
               <motion.ul
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -189,10 +196,10 @@ const FollowDashboard = () => {
                 {searchResults.map((user) => (
                   <li
                     key={user._id}
-                onClick={() => {
+                    onClick={() => {
                       setFollowedName(user.name);
-                  setSelectedUser(user);
-                  setProfileimage(user.profileimage);
+                      setSelectedUser(user);
+                      setProfileimage(user.profileimage);
                       setShowProfile(true);
                       setSearchResults([]);
                       setRecentSearches((prev) => {

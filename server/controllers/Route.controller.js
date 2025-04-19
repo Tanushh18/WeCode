@@ -1,11 +1,18 @@
 const User = require("../models/user.model");
+const ActivityLog = require("../models/activitylog.model");
 const path = require("path");
 const xlsx = require("xlsx");
 const admin = require("firebase-admin");
 require("dotenv").config();
 
 if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS);
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS);
+  } catch (e) {
+    console.error("Failed to parse FIREBASE_ADMIN_CREDENTIALS. Make sure it is a valid JSON string.");
+    throw e;
+  }
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
@@ -57,17 +64,36 @@ const loginUser = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // ✅ Log login activity
+    const today = new Date().toISOString().split("T")[0];
+    console.log("Logging activity for:", email);
+    let activityLog = await ActivityLog.findOne({ email });
+    if (!activityLog) {
+      activityLog = new ActivityLog({ email, logins: { [today]: 1 } });
+    } else {
+      activityLog.logins.set(today, (activityLog.logins.get(today) || 0) + 1);
+    }
+    console.log("Activity log before save:", activityLog);
+    await activityLog.save();
+    
+    if (!user.activitylog || !user.activitylog.equals(activityLog._id)) {
+      user.activitylog = activityLog._id;
+      await user.save();
+    }
+
     const options = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
     };
-    
+
+    // ✅ Send only ONE response
     res
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .status(200)
       .json({ message: "Login successful." });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Login failed." });
@@ -176,13 +202,29 @@ const googleAuth = async (req, res) => {
     const refreshToken = user.getRefreshToken();
     user.refreshToken = refreshToken;
     await user.save();
-
+    
+    const today = new Date().toISOString().split("T")[0];
+    console.log("Logging activity for:", email);
+    let activityLog = await ActivityLog.findOne({ email });
+    if (!activityLog) {
+      activityLog = new ActivityLog({ email, logins: { [today]: 1 } });
+    } else {
+      activityLog.logins.set(today, (activityLog.logins.get(today) || 0) + 1);
+    }
+    console.log("Activity log before save:", activityLog);
+    await activityLog.save();
+    
+    if (!user.activitylog || !user.activitylog.equals(activityLog._id)) {
+      user.activitylog = activityLog._id;
+      await user.save();
+    }
+    
     const options = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
     };
-
+    
     res
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)

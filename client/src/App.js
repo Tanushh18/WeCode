@@ -4,13 +4,13 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import Dashboard from "./screens/DSAdashboard";
 import UserDetails from "./screens/UserDetails";
-import CustomRoom from "./screens/CustomRoom";
+import CustomRoom from "./Rooms/CustomRoom";
 import Livechatroom from "./Rooms/livechatroom";
 import FollowDashboard from "./screens/FollowDashboard";
 import UserUpdateDetails from "./screens/UsersUpdateDetails";
 import Feed from "./screens/Feed";
 import "./App.css";
-import UploadPosts from "./screens/UploadPosts";
+import UploadPosts from "./Rooms/UploadPosts";
 import SolvedProblemsList from "./screens/solvedproblemslist";
 
 function App() {
