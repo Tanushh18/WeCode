@@ -4,13 +4,14 @@ import { Box, HStack } from "@chakra-ui/react";
 import Editor from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../constants";
-import { io } from "socket.io-client";
+import socket from "../sockets/socket";
+// import { io } from "socket.io-client";
 
-// Global socket instance (only created once)
-const socket = io(process.env.REACT_APP_SOCKET_URL, {
-  withCredentials: true,
-  autoConnect: false, // Connect manually
-});
+// // Global socket instance (only created once)
+// const socket = io(process.env.REACT_APP_SOCKET_URL, {
+//   withCredentials: true,
+//   autoConnect: false, // Connect manually
+// });
 
 const getLanguageName = (id) => {
   switch (id) {
@@ -119,40 +120,50 @@ const CodeEditor = ({ editorRef, languageId, setLanguageId, defaultLanguageId = 
     fetchDefaultCode();
   }, [publicRoomId]);
 
-  return (
-    <HStack align="start" spacing={4} p={4}>
-      <Box w="100%">
+return (
+  
+  
+     <Box
+      width={{ base: "80%", md: "60%" }}  // 100% on mobile, 80% on larger screens
+      height="75vh"
+      bg="gray.800"
+      borderRadius="md"
+      boxShadow="xl"
+      overflow="hidden"
+      display="flex"
+      justifyContent={{ base: "center", md: "flex-end" }}  // Align to center on mobile, right on larger screens
+  >
+     <div>
+          <LanguageSelector language={getLanguageName(languageId)} onSelect={onSelect} />
+          <button
+            onClick={() => setTheme(theme === "vs-dark" ? "light" : "vs-dark")}
+          >
+            Change Theme
+          </button>
+        </div>
         <Editor
           height="75vh"
-          theme={theme}
+          theme={theme} 
           language={getLanguageName(languageId)}
           value={value}
           onMount={onMount}
           onChange={handleCodeChange}
           options={{
-            fontSize: 14,
-            minimap: { enabled: false },
-            wordWrap: "on",
-            scrollBeyondLastLine: false,
+            fontSize: 16, // Larger, readable font size
+            fontFamily: 'Fira Code, monospace', // Professional monospaced font
+            lineHeight: 1.5, // Better line spacing for readability
+            minimap: { enabled: false }, // Minimaps are often unnecessary for professional UIs
+            wordWrap: "on", // Ensures code wraps correctly within the editor
+            scrollBeyondLastLine: false, // Keeps the editor clean without unnecessary space at the end
+            renderWhitespace: "none", // Removes unnecessary whitespace in the editor
+            cursorBlinking: "smooth", // Smooth cursor blinking
           }}
         />
-
-        <div style={{ display: "flex", marginTop: "16px" }}>
-          <LanguageSelector language={getLanguageName(languageId)} onSelect={onSelect} />
-          <button
-            onClick={() => setTheme(theme === "vs-dark" ? "light" : "vs-dark")}
-            style={{
-              marginLeft: "10px",
-              width: "30%",
-              height: "40px",
-            }}
-          >
-            Change Theme
-          </button>
-        </div>
+       
       </Box>
-    </HStack>
-  );
+   
+    
+)
 };
 
 export default CodeEditor;

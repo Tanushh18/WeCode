@@ -63,6 +63,9 @@ const userSchema = mongoose.Schema(
     questions: {
       type: [
         {
+          title: {
+            type : String,
+          },
           questionId: {
             type: String,
             required: true,
@@ -122,6 +125,21 @@ const userSchema = mongoose.Schema(
     activitylog: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ActivityLog",
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    points: {
+      type: Number,
+      default: 0
+    },
+    otp: {
+      type: Number,
+    },
+    otpExpiration: {
+      type: Date,
     }
     
   },

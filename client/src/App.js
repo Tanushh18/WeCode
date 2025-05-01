@@ -1,19 +1,41 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomeScreen from "./screens/HomeScreen";
-import LoginScreen from "./screens/LoginScreen";
-import RegisterScreen from "./screens/RegisterScreen";
-import Dashboard from "./screens/DSAdashboard";
-import UserDetails from "./screens/UserDetails";
-import CustomRoom from "./Rooms/CustomRoom";
-import Livechatroom from "./Rooms/livechatroom";
-import FollowDashboard from "./screens/FollowDashboard";
-import UserUpdateDetails from "./screens/UsersUpdateDetails";
-import Feed from "./screens/Feed";
+import { useEffect } from "react";
+import socket from "./sockets/socket";
+import HomeScreen from "./screens/HomeScreen/HomeScreen";
+import LoginScreen from "./screens/LoginScreen/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen/RegisterScreen";
+import Dashboard from "./screens/DSA/DsaDashboard";
+import UserDetails from "./screens/UserDetails/UserDetails";
+import CustomRoom from "./screens/CustomRoom/CustomRoom";
+import Livechatroom from "./screens/LiveChatRoom/LiveChatRoom";
+import FollowDashboard from "./screens/Follow/FollowDashboard";
+import UserUpdateDetails from "./screens/UserDetails/UsersUpdateDetails";
+import Feed from "./screens/FeedDashboard/FeedDashboard";
 import "./App.css";
-import UploadPosts from "./Rooms/UploadPosts";
-import SolvedProblemsList from "./screens/solvedproblemslist";
+import UploadPosts from "./screens/UploadPosts/UploadPosts";
+import SolvedProblemsList from "./screens/solvedproblemslist/solvedproblemslist";
+import AdminDashboard from "./screens/Admin/AdminDashboard";
+import AboutScreen from "./screens/AboutScreen/AboutScreen";
+import DevopsScreen from "./screens/DevOps/DevOpsScreen";
+import WebDevScreen from "./screens/WebDev/WebDevScreen";
+import WebDevProjectsScreen from "./screens/WebDev/WebDevProjectsScreen";
+import DevopsProjectsScreen from "./screens/DevOps/DevOpsProjectsScreen";
+import DsaCoursesScreen from "./screens/DSA/DsaCoursesScreen";
 
 function App() {
+  useEffect(() => {
+    socket.on("forceLogout", () => {
+      alert("Your account was deleted. Please log in again.");
+      document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = "/login";
+    });
+
+    return () => {
+      socket.off("forceLogout");
+    };
+  }, []);
+
   return (
     <Router>
       <Routes>
@@ -30,6 +52,13 @@ function App() {
         <Route path="/Feed" element={<Feed />} />
         <Route path="/customroom/:publicRoomId/:privateRoomId" element={<CustomRoom />} />
         <Route path="/solvedproblemslist" element={<SolvedProblemsList />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/about" element={<AboutScreen />} />
+        <Route path="/webdev" element={<WebDevScreen />} />
+        <Route path="/devops" element={<DevopsScreen />} />
+        <Route path="/webdevprojects" element={<WebDevProjectsScreen />} />
+        <Route path="/devopsprojects" element={<DevopsProjectsScreen />} />
+        <Route path="/dsacourses" element={<DsaCoursesScreen />} />
       </Routes>
     </Router>
   );

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { handleLogout } from "../utils/Logout";
-import Layout from "../Layout1/Layout";
-import Navbar from "../Layout1/Navbar";
+import { handleLogout } from "../../utils/Logout";
+import Layout from "../../Layout1/Layout";
+import Navbar from "../../Layout1/Navbar";
 
 const UserUpdateDetails = () => {
   const [showmenu, setshowmenu] = React.useState(false);
@@ -16,9 +16,9 @@ const UserUpdateDetails = () => {
   const [goals, setGoals] = useState("");
   const [github, setGithub] = useState("");
   const [linkedin, setLinkedin] = useState("");
-const [profileImage, setProfileImage] = useState("");
-const [profileImageFile, setProfileImageFile] = useState(null);
-const [message, setMessage] = React.useState("");
+  const [profileImage, setProfileImage] = useState("");
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [message, setMessage] = React.useState("");
 
   // Follower and following counts
   const [followingCount, setFollowingCount] = useState(0);
@@ -60,52 +60,56 @@ const [message, setMessage] = React.useState("");
     fetchFollowCounts();
   }, []);
 
-const handleProfileImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    setProfileImageFile(file);
-    setProfileImage(URL.createObjectURL(file)); // Optional preview
-  }
-};
-
-const Updateprofile = async (e) => {
-  e.preventDefault();
-
-  const formData = new FormData();
-  formData.append("name", name);
-  formData.append("email", email);
-  formData.append("password", password);
-  formData.append("phone", phone);
-  formData.append("bio", bio);
-  formData.append("goals", goals);
-  formData.append("github", github);
-  formData.append("linkedin", linkedin);
-  if (profileImageFile) {
-    formData.append("profileImage", profileImageFile);
-  }
-
-  try {
-    const response = await axios.post(
-      process.env.REACT_APP_USER_UPDATE_PROFILE,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      }
-    );
-
-    setMessage("Data Updated Successfully");
-  } catch (error) {
-    console.error("Upload error:", error);
-    if (error.response && error.response.data && error.response.data.message) {
-      setMessage(error.response.data.message);
-    } else {
-      setMessage("An error occurred while updating.");
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImageFile(file);
+      setProfileImage(URL.createObjectURL(file)); // Optional preview
     }
-  }
-};
+  };
+
+  const Updateprofile = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("phone", phone);
+    formData.append("bio", bio);
+    formData.append("goals", goals);
+    formData.append("github", github);
+    formData.append("linkedin", linkedin);
+    if (profileImageFile) {
+      formData.append("profileImage", profileImageFile);
+    }
+
+    try {
+      const response = await axios.post(
+        process.env.REACT_APP_USER_UPDATE_PROFILE,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      setMessage("Data Updated Successfully");
+    } catch (error) {
+      console.error("Upload error:", error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage("An error occurred while updating.");
+      }
+    }
+  };
 
   const handleLogoutClick = () => {
     setshowmenu(false);
@@ -116,15 +120,12 @@ const Updateprofile = async (e) => {
     setshowmenu(!showmenu);
   };
 
-  
-
   return (
     <Layout>
       <Navbar
         showMenu={showmenu}
         onToggleMenu={handleToggleMenu}
         onLogout={handleLogoutClick}
-        
       />
 
       <div
@@ -133,17 +134,27 @@ const Updateprofile = async (e) => {
           padding: "40px",
           maxWidth: "600px",
           margin: "50px auto",
-          backgroundColor: "#000",
-          border: "2px solid violet",
+          backgroundColor: "#213448",
+          border: "2px solid #547792",
           borderRadius: "10px",
-          boxShadow: "0 0 15px rgba(138, 43, 226, 0.5)",
+          boxShadow: "0 0 15px #94B4C1",
           marginTop: "100px",
         }}
       >
-        <h2 className="form-title" style={{ textAlign: "center", color: "violet", marginBottom: "25px" }}>
+        <h2
+          className="form-title"
+          style={{
+            textAlign: "center",
+            color: "#94B4C1",
+            marginBottom: "25px",
+          }}
+        >
           User Profile
         </h2>
-        <form className="user-form" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <form
+          className="user-form"
+          style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+        >
           <input
             name="name"
             value={name}
@@ -216,13 +227,18 @@ const Updateprofile = async (e) => {
             Update Profile
           </button>
           {message && (
-            <p style={{ color: message === "Username already taken." ? "red" : "green" }}>
+            <p
+              style={{
+                color:
+                  message === "Username already taken." ? "red" : "#ECEFCA",
+              }}
+            >
               {message}
             </p>
           )}
         </form>
 
-        <div style={{ marginTop: "20px", color: "white" }}>
+        <div style={{ marginTop: "20px", color: "#ECEFCA" }}>
           <p>Following: {followingCount}</p>
           <p>Followers: {followerCount}</p>
         </div>
@@ -233,17 +249,17 @@ const Updateprofile = async (e) => {
 
 const inputStyle = {
   padding: "12px",
-  border: "1px solid #8a2be2",
+  border: "1px solid #94B4C1",
   borderRadius: "5px",
-  backgroundColor: "#111",
-  color: "#fff",
+  backgroundColor: "#547792",
+  color: "#ECEFCA",
   fontSize: "14px",
 };
 
 const buttonStyle = {
   padding: "12px",
-  backgroundColor: "#8a2be2",
-  color: "#fff",
+  backgroundColor: "#547792",
+  color: "#ECEFCA",
   border: "none",
   borderRadius: "5px",
   fontWeight: "bold",
@@ -251,7 +267,7 @@ const buttonStyle = {
 };
 
 const linkStyle = {
-  color: "#fff",
+  color: "#ECEFCA",
   textDecoration: "none",
 };
 

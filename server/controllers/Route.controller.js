@@ -1,8 +1,17 @@
+const Room = require("../models/Room.model");
+const Post = require("../models/post.model"); // Add this import
 const User = require("../models/user.model");
+const Follow = require("../models/Follow.model");
+const Question = require("../models/adminquestions.model");
+const CustomList = require("../models/customList.model");
 const ActivityLog = require("../models/activitylog.model");
 const path = require("path");
 const xlsx = require("xlsx");
 const admin = require("firebase-admin");
+const { log } = require("console");
+const { default: socket } = require("../../client/src/sockets/socket");
+const { getIO, userSocketMap } = require("../Sockets/socket");
+const sendEmail = require("../middleware/emailverify");  // Correct relative path // Make sure to implement this utility
 require("dotenv").config();
 
 if (!admin.apps.length) {
@@ -57,23 +66,28 @@ const loginUser = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid password." });
     }
+    const adminEmails = process.env.adminEmails.split(",").map(email => email.trim());
+if (adminEmails.includes(user.email)) {
+  user.role = "admin";
+} else {
+  user.role = "user";
+}
 
-    const accessToken = user.getAccessToken();
+    const accessToken = user.getAccessToken({ role: user.role });
     const refreshToken = user.getRefreshToken();
 
     user.refreshToken = refreshToken;
+    user.points = ++user.points;
     await user.save();
 
     // ✅ Log login activity
     const today = new Date().toISOString().split("T")[0];
-    console.log("Logging activity for:", email);
-    let activityLog = await ActivityLog.findOne({ email });
+    let activityLog = await ActivityLog.findOne({ user: user._id });
     if (!activityLog) {
-      activityLog = new ActivityLog({ email, logins: { [today]: 1 } });
+      activityLog = new ActivityLog({ user: user._id, logins: { [today]: 1 } });
     } else {
       activityLog.logins.set(today, (activityLog.logins.get(today) || 0) + 1);
     }
-    console.log("Activity log before save:", activityLog);
     await activityLog.save();
     
     if (!user.activitylog || !user.activitylog.equals(activityLog._id)) {
@@ -87,12 +101,12 @@ const loginUser = async (req, res) => {
       sameSite: "None",
     };
 
-    // ✅ Send only ONE response
+    // ✅ Send only ONE response, include user role
     res
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .status(200)
-      .json({ message: "Login successful." });
+      .json({ message: "Login successful.", role: user.role, id : user._id });
 
   } catch (error) {
     console.error(error);
@@ -172,12 +186,81 @@ const getDefaultCodeByTitle = (req, res) => {
   }
 };
 
+
+const alluserssignedin = async (req, res) => {
+  try {
+    const users = await User.find({ isGoogleUser: false });
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+}
+const allusers = async (req, res) => {
+  try {
+    const users = await User.find();
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+}
+const deleteuser = async (req, res) => {
+  try {
+    const { userId } = req.body; // Get the userId from the request body
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    // Delete all records related to the user
+    await Room.deleteMany({ participants: userId });
+    await Post.deleteMany({ user: userId });
+    await Follow.deleteMany({ $or: [{ followerId: userId }, { followingId: userId }] });
+    await CustomList.deleteMany({ user: userId });
+    await ActivityLog.deleteMany({ user: userId });
+
+    // Finally, delete the user
+    const result = await User.deleteOne({ _id: userId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // 🔥 Force logout the user if connected
+    const io = getIO();
+    const targetSocketId = userSocketMap.get(userId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("forceLogout");
+      console.log(`🚨 Forced logout for user ${userId}`);
+    } else {
+      console.log(`⚠️ User ${userId} not connected.`);
+    }
+
+
+    return res.status(200).json({ message: "User and related data deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+};
+
+
+const allgoogleusers = async (req, res) => {
+  try {
+    const users = await User.find({ isGoogleUser: true });
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+}
+
 const googleAuth = async (req, res) => {
   const { idToken } = req.body;
 
   try {
-    console.log("Received idToken:", idToken);
+    
     const decodedToken = await admin.auth().verifyIdToken(idToken);
+    
+    
     const { email, name, picture } = decodedToken;
 
     let user = await User.findOne({ email });
@@ -198,20 +281,28 @@ const googleAuth = async (req, res) => {
       await user.save();
     }
 
-    const accessToken = user.getAccessToken();
+    const adminEmails = process.env.adminEmails.split(",").map(email => email.trim());
+
+    
+if (adminEmails.includes(user.email)) {
+  user.role = "admin";
+} else {
+  user.role = "user";
+}
+    
+    const accessToken = user.getAccessToken({ role: user.role });
     const refreshToken = user.getRefreshToken();
     user.refreshToken = refreshToken;
+    user.points = ++user.points;
     await user.save();
     
     const today = new Date().toISOString().split("T")[0];
-    console.log("Logging activity for:", email);
-    let activityLog = await ActivityLog.findOne({ email });
+    let activityLog = await ActivityLog.findOne({ user: user._id });
     if (!activityLog) {
-      activityLog = new ActivityLog({ email, logins: { [today]: 1 } });
+      activityLog = new ActivityLog({ user: user._id, logins: { [today]: 1 } });
     } else {
       activityLog.logins.set(today, (activityLog.logins.get(today) || 0) + 1);
     }
-    console.log("Activity log before save:", activityLog);
     await activityLog.save();
     
     if (!user.activitylog || !user.activitylog.equals(activityLog._id)) {
@@ -229,7 +320,7 @@ const googleAuth = async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .status(200)
-      .json({ message: "Google login successful." });
+      .json({ message: "Google login successful.", role: user.role , id: user._id });
 
   } catch (error) {
     console.error("Firebase Auth Error:", error.message, error.stack);
@@ -265,7 +356,7 @@ const createRoom = async (req, res) => {
     }
 
     // Example schema: { name: String, createdBy: ObjectId (User), participants: [] }
-    const Room = require("../models/room.model");
+   
     const newRoom = new Room({
       name: roomName,
       createdBy: req.user._id,
@@ -280,6 +371,109 @@ const createRoom = async (req, res) => {
   }
 };
 
+const allactivitylogs = async (req, res) => {
+  try {
+    const activityLogs = await ActivityLog.find();
+    return res.status(200).json({ activityLogs });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred.", error });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Generate a reset token or OTP (can be a random token for reset link)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();  // Example OTP generation
+
+    // Send OTP to the user's email (use your email service like Gmail, Mailgun, etc.)
+    await sendEmail(email, "Password Reset OTP", `Your OTP is: ${otp}`);
+
+    // Store OTP and expiration time in the database
+    user.otp = Number(otp);
+    user.otpExpiration = Date.now() + 10 * 60 * 1000;  // 10 minutes expiration
+    await user.save();
+
+    res.status(200).json({ message: "OTP sent to your email." });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({ message: "Failed to send OTP." });
+  }
+};
+
+const verifyotp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (!user.otp || !user.otpExpiration) {
+      return res.status(400).json({ message: "No OTP request found. Please request a new OTP." });
+    }
+
+    if (user.otp !== Number(otp)) {
+      return res.status(400).json({ message: "Invalid OTP." });
+    }
+
+    if (user.otpExpiration < Date.now()) {
+      return res.status(400).json({ message: "OTP has expired." });
+    }
+
+    // Clear OTP after successful verification
+    user.otp = null;
+    user.otpExpiration = null;
+    await user.save();
+
+    res.status(200).json({ message: "OTP verified successfully." });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Failed to verify OTP." });
+  }
+};
+
+const updateuserpassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Update password only if provided (bcrypt will handle the hashing in the pre-save hook)
+    if (password) {
+      user.password = password;  // Just assign the new password, bcrypt will handle hashing
+    }
+
+    await user.save();
+    res.status(200).json({ message: "Password updated successfully." });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Failed to update password." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -289,4 +483,12 @@ module.exports = {
   googleAuth,
   authenticateUser,
   createRoom,
+  allgoogleusers,
+  allusers,
+  alluserssignedin,
+  deleteuser,
+  allactivitylogs,
+  forgotPassword,
+  verifyotp,
+  updateuserpassword
 };

@@ -1,10 +1,76 @@
 const User = require("../models/user.model");
 const CustomList = require("../models/customList.model");
+const Problem = require("../models/adminquestions.model");
 
+
+
+// Admin add question
+const adminquestionadd = async (req, res) => {
+    try {
+        const { topic, title, difficulty, revision, important, link, problemStatement, sampleInput, sampleOutput, constraints } = req.body;
+        const existingQuestion = await Problem.findOne({ title });
+        if (existingQuestion) {
+            return res.status(400).json({ message: "Question already exists." });
+        }
+        const newQuestion = new Problem({
+            topic,
+            title,
+            difficulty,
+            revision,
+            important,
+            link,
+            problemStatement,
+            sampleInput,
+            sampleOutput,
+            constraints
+        });
+        await newQuestion.save();
+        return res.status(200).json({ message: "Question added successfully." });
+    } catch (error) {
+        console.error("Error adding question:", error);
+        return res.status(500).json({ message: "Failed to add question." });
+    }
+};
+const adminquestiondelete = async(req , res) => {
+    try {
+        const {topic , title} = req.body;
+        const deletedQuestion = await Problem.findOneAndDelete({ title });
+        if (!deletedQuestion) {
+            return res.status(404).json({ message: "Question not found." });
+        }
+        return res.status(200).json({ message: "Question deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting question:", error);
+        return res.status(500).json({ message: "Failed to delete question." });
+        }
+}
+
+const adminquestionupdate = async(req , res) => {
+    try {
+        const { topic, title, difficulty, revision, important, link, problemStatement, sampleInput, sampleOutput, constraints } = req.body;
+        const updatedQuestion = await Problem.findOneAndUpdate({ title }, { topic, difficulty, revision, important, link, problemStatement, sampleInput, sampleOutput, constraints }, { new: true });
+        if (!updatedQuestion) {
+            return res.status(404).json({ message: "Question not found." });
+        }
+        return res.status(200).json({ message: "Question updated successfully." });
+    } catch (error) {
+        console.error("Error updating question:", error);
+        return res.status(500).json({ message: "Failed to update question." });
+   } 
+}
+const getAllAdminQuestions = async (req, res) => {
+    try {
+      const questions = await Problem.find(); // Fetch all questions
+      return res.status(200).json({ questions });
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      return res.status(500).json({ message: "Failed to fetch questions." });
+    }
+  };
 
 const updateQuestion = async (req, res) => {
     try {
-        const { questionId, field, value } = req.body;
+        const { title ,questionId, field, value } = req.body;
 
         const user = await User.findOne({ email: req.user.email });
         if (!user) {
@@ -16,16 +82,17 @@ const updateQuestion = async (req, res) => {
         if (questionIndex !== -1) {
             // Update specific field
             user.questions[questionIndex][field.toLowerCase()] = value === "Yes";
-            if(field === "important" && value === "Yes"){
+            if(field.toLowerCase() === "important" && value === "Yes"){
                 user.questions[questionIndex].timestamp = new Date();
             }
         } else {
             // Create new question entry with the correct field
             const newQuestion = {
+                title,
                 questionId,
                 revision: field === "Revision" ? value === "Yes" : false,
                 important: field === "Important" ? value === "Yes" : false,
-                timestamp: field === "important" && value === "Yes" ? new Date() : null
+            timestamp: value === "Yes" ? new Date() : null
             };
             user.questions.push(newQuestion);
         }
@@ -71,7 +138,7 @@ const createcustomList = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
-        const customlist = new CustomList({ name: listname, questions: [], userEmail: req.user.email });
+        const customlist = new CustomList({ name: listname, questions: [], user: req.user._id });
         await customlist.save();
         user.customLists.push(customlist._id);
         await user.save();
@@ -88,7 +155,7 @@ const allcustomlists = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
-        const customLists = await CustomList.find({ userEmail: req.user.email });
+        const customLists = await CustomList.find({ user: req.user._id });
         return res.status(200).json({ customLists });
     } catch (error) {
         return res.status(500).json({ message: "An error occurred.", error });
@@ -159,7 +226,6 @@ const deletecustomlist = async (req, res) => {
 const deletequestionfromcustomlist = async (req, res) => {
     try {
         const { listId, questionId } = req.body;
-        console.log("Deleting from list:", listId, "question:", questionId);
         const user = await User.findOne({ email: req.user.email });
         if (!user) {
             return res.status(404).json({ message: "User not found." });
@@ -176,6 +242,27 @@ const deletequestionfromcustomlist = async (req, res) => {
     }
 }
 
+const questiongraph = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.user.email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const titlecount = {};
+        user.questions.forEach(question => {
+            if (!question.title) return;
+            if (question.title in titlecount) {
+                titlecount[question.title]++;
+            } else {
+                titlecount[question.title] = 1;
+            }
+        });
+        return res.status(200).json({ titlecount });
+    } catch (error) {
+        return res.status(500).json({ message: "An error occurred.", error });
+    }
+}
+
 module.exports = {
     updateQuestion,
     fetchquestion,
@@ -185,5 +272,10 @@ module.exports = {
     addquestions,
     viewcustomlist,
     deletecustomlist,
-    deletequestionfromcustomlist
+    deletequestionfromcustomlist,
+    questiongraph,
+    adminquestionadd,
+    getAllAdminQuestions,
+    adminquestiondelete,
+    adminquestionupdate
 };

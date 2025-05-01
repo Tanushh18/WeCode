@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { loginWithGoogle } from "../utils/FireBase";
+import { loginWithGoogle } from "../../utils/FireBase";
+import socket from "../../sockets/socket";
+import ResetModal from "./ResetModal";
 
 const LoginScreen = () => {
   const [message, setMessage] = useState("");
@@ -9,6 +11,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [serverStatus, setServerStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);  // Add this line
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +35,15 @@ const LoginScreen = () => {
         { withCredentials: true }
       );
       setMessage(response.data.message);
-      navigate("/Feed");
+
+      const { role , id } = response.data;  // Get role from the response
+      socket.emit("registerUser", id);
+      if (role === "admin") {
+        navigate("/admin-dashboard");  // Redirect to admin dashboard
+      } else {
+        navigate("/Feed");  // Redirect to user dashboard
+      }
+      
     } catch (error) {
       console.error(error);
       setMessage(error.response?.data?.message || "Login failed.");
@@ -48,12 +59,12 @@ const LoginScreen = () => {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#0d1117",
+          backgroundColor: "#213448",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          color: "#ffffff",
+          color: "#ECEFCA",
           fontFamily: "Segoe UI, sans-serif",
         }}
       >
@@ -68,8 +79,8 @@ const LoginScreen = () => {
 
         <div
           style={{
-            backgroundColor: "#0d1117",
-            border: "1px solid #30363d",
+            backgroundColor: "#547792",
+            border: "1px solid #94B4C1",
             borderRadius: "6px",
             padding: "20px",
             width: "300px",
@@ -94,10 +105,10 @@ const LoginScreen = () => {
                 padding: "8px",
                 marginTop: "5px",
                 marginBottom: "15px",
-                border: "1px solid #30363d",
+                border: "1px solid #94B4C1",
                 borderRadius: "6px",
-                backgroundColor: "#0d1117",
-                color: "#c9d1d9",
+                backgroundColor: "#213448",
+                color: "#ECEFCA",
               }}
             />
 
@@ -115,9 +126,11 @@ const LoginScreen = () => {
                 href="#"
                 style={{
                   fontSize: "12px",
-                  color: "#58a6ff",
+                  color: "#94B4C1",
                   textDecoration: "none",
+                  cursor: "pointer",
                 }}
+                onClick={() => setShowResetModal(true)}
               >
                 Forgot password?
               </a>
@@ -132,10 +145,10 @@ const LoginScreen = () => {
                 padding: "8px",
                 marginTop: "5px",
                 marginBottom: "15px",
-                border: "1px solid #30363d",
+                border: "1px solid #94B4C1",
                 borderRadius: "6px",
-                backgroundColor: "#0d1117",
-                color: "#c9d1d9",
+                backgroundColor: "#213448",
+                color: "#ECEFCA",
               }}
             />
 
@@ -144,8 +157,8 @@ const LoginScreen = () => {
               style={{
                 width: "100%",
                 padding: "10px",
-                backgroundColor: "#238636",
-                color: "#fff",
+                backgroundColor: "#94B4C1",
+                color: "#213448",
                 border: "none",
                 borderRadius: "6px",
                 fontSize: "16px",
@@ -167,14 +180,24 @@ const LoginScreen = () => {
                   const result = await loginWithGoogle();
                   const idToken = await result.user.getIdToken();
 
-                  await axios.post(
+                  
+
+
+                  const response = await axios.post(
                     `${process.env.REACT_APP_GOOGLE_AUTH_URI}`,
                     { idToken },
                     { withCredentials: true }
                   );
-
+                  
                   setMessage("Login successful");
-                  navigate("/Feed");
+                  const { role } = response.data;  // Get role from the response
+                  const { id } = response.data;
+                  socket.emit("registerUser", id);
+                  if (role === "admin") {
+                    navigate("/admin-dashboard");  // Redirect to admin dashboard
+                  } else {
+                    navigate("/Feed");  // Redirect to user dashboard
+                  }
                 } catch (error) {
                   console.error("Firebase Google login error:", error);
                   setMessage("Google Login Failed");
@@ -187,7 +210,7 @@ const LoginScreen = () => {
                 width: "100%",
                 padding: "10px",
                 backgroundColor: "#4285F4",
-                color: "#fff",
+                color: "#ECEFCA",
                 border: "none",
                 borderRadius: "6px",
                 fontSize: "16px",
@@ -205,9 +228,9 @@ const LoginScreen = () => {
           style={{
             marginTop: "15px",
             padding: "12px 20px",
-            border: "1px solid #30363d",
+            border: "1px solid #94B4C1",
             borderRadius: "6px",
-            backgroundColor: "#0d1117",
+            backgroundColor: "#547792",
             fontSize: "14px",
           }}
         >
@@ -215,7 +238,7 @@ const LoginScreen = () => {
           <span
             onClick={handleRegister}
             style={{
-              color: "#58a6ff",
+              color: "#ECEFCA",
               cursor: "pointer",
               fontWeight: "600",
             }}
@@ -240,21 +263,21 @@ const LoginScreen = () => {
           style={{
             marginTop: "40px",
             fontSize: "12px",
-            color: "#8b949e",
+            color: "#94B4C1",
             display: "flex",
             gap: "15px",
           }}
         >
-          <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          <a href="#" style={{ color: "#94B4C1", textDecoration: "none" }}>
             Terms
           </a>
-          <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          <a href="#" style={{ color: "#94B4C1", textDecoration: "none" }}>
             Privacy
           </a>
-          <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          <a href="#" style={{ color: "#94B4C1", textDecoration: "none" }}>
             Security
           </a>
-          <a href="#" style={{ color: "#8b949e", textDecoration: "none" }}>
+          <a href="#" style={{ color: "#94B4C1", textDecoration: "none" }}>
             Contact GitHub
           </a>
         </div>
@@ -265,12 +288,14 @@ const LoginScreen = () => {
             bottom: "10px",
             right: "10px",
             fontSize: "13px",
-            color: "#8b949e",
+            color: "#94B4C1",
           }}
         >
           {serverStatus}
         </div>
       </div>
+      {/* Reset Modal */}
+      <ResetModal show={showResetModal} onClose={() => setShowResetModal(false)} />
     </>
   );
 };
