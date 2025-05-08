@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
@@ -12,34 +12,41 @@ import socket from "../../sockets/socket.js";
 // const socket = io(process.env.REACT_APP_SOCET_URL);
 
 const Dashboard = () => {
+  const [topic, setTopic] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [sortedQuestions, setSortedQuestions] = useState([]);
+  const [titles, setTitles] = useState([]);
+  const [topics, setTopics] = useState([]);
   const [quote, setQuote] = useState("");
   const [showmenu, setshowmenu] = useState(false);
   const [joinRoomId, setJoinRoomId] = useState("");
+  const [showTopics, setShowTopics] = useState(false); // For Sort By dropdown
+  const dropdownRef = useRef(null); // Reference to dropdown container
+  const buttonRef = useRef(null); // Reference to Sort By button
   const navigate = useNavigate();
-
+  const handleSortByClick = () => {
+    setShowTopics(!showTopics);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setShowTopics(false); // Close dropdown
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     setQuote(quoteList[Math.floor(Math.random() * quoteList.length)]);
   }, []);
-
-  // useEffect(() => {
-  //   const fetchExcel = async () => {
-  //     const response = await fetch("/questions.xlsx");
-  //     const arrayBuffer = await response.arrayBuffer();
-  //     const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-  //     const data = XLSX.utils.sheet_to_json(worksheet);
-  //     const cleanedData = data.map((q) => ({
-  //       ...q,
-  //       Topic: q["Topics"] || q.Topic || "Miscellaneous",
-  //     }));
-  //     setQuestions(cleanedData);
-  //     fetchResponse();
-  //   };
-  //   fetchExcel();
-  // }, []);
-
   useEffect(() => {
     const fetchQuestionsFromBackend = async () => {
       try {
@@ -50,7 +57,6 @@ const Dashboard = () => {
           }
         );
         const data = response.data.questions;
-
         const cleanedData = data.map((q) => ({
           Topic: q.topic || "Miscellaneous",
           Title: q.title,
@@ -63,17 +69,24 @@ const Dashboard = () => {
           "Sample Output": q.sampleOutput,
           Constraints: q.constraints,
         }));
-
-        setQuestions(cleanedData);
+        const sortedData = cleanedData.sort((a, b) =>
+          a.Difficulty.localeCompare(b.Difficulty)
+        );
+        setQuestions(sortedData);
+        setSortedQuestions(sortedData);
+        setTitles(sortedData.map((q) => q.Title));
+        // Extract unique topics for topic buttons
+        const uniqueTopics = Array.from(
+          new Set(sortedData.map((q) => q.Topic))
+        );
+        setTopics(uniqueTopics);
         fetchResponse();
       } catch (error) {
         console.error("Error fetching questions from backend:", error);
       }
     };
-
     fetchQuestionsFromBackend();
   }, []);
-
   const handleCreateRoom = async (question, customState = {}) => {
     const roomId = slugify(question.Title);
     const roomData = {
@@ -87,8 +100,12 @@ const Dashboard = () => {
     };
 
     try {
+      const token = localStorage.getItem("authToken");
       const response = await axios.get(process.env.REACT_APP_ROOM_CREATE, {
         withCredentials: true,
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
       const privateRoomId = response.data.roomId;
 
@@ -99,7 +116,6 @@ const Dashboard = () => {
       console.error("❌ Failed to create private room:", error);
     }
   };
-
   const handleJoinRoom = async (question) => {
     const privateRoomId = prompt(
       `Enter private room ID for "${question.Title}"`
@@ -137,7 +153,6 @@ const Dashboard = () => {
       console.log("❌ Room join failed:", errMsg);
     }
   };
-
   const handleUpdateQuestion = async (index, field, value) => {
     const updatedQuestions = [...questions];
     const newValue = value === "Yes" ? "No" : "Yes";
@@ -159,7 +174,6 @@ const Dashboard = () => {
       console.error(error);
     }
   };
-
   const fetchResponse = async () => {
     try {
       const response = await axios.get(process.env.REACT_APP_FETCH_DASHBOARD, {
@@ -187,20 +201,16 @@ const Dashboard = () => {
       console.error(error);
     }
   };
-
   const handleLogoutClick = () => {
     setshowmenu(false);
     handleLogout(navigate);
   };
-
   const handleToggleMenu = () => {
     setshowmenu(!showmenu);
   };
-
   const handleNavigateToDashboard = () => {
     navigate("/dsadashboard");
   };
-
   const slugify = (str) => {
     return str
       .toLowerCase()
@@ -209,16 +219,29 @@ const Dashboard = () => {
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
   };
-
   const handleJoinQuestionRoom = (title) => {
     const publicroomID = slugify(title);
     navigate(`/questionroom/${publicroomID}`);
   };
-
   const handleSolvequestion = (question) => {
     handleCreateRoom(question, { hideRoomId: true });
   };
-
+  const handleTopicClick = (selectedTopic) => {
+    if (topic === selectedTopic) {
+      setTopic("");
+      setFilteredData(sortedQuestions); // Reset to show all sorted questions
+    } else {
+      setTopic(selectedTopic);
+      const filtered = sortedQuestions.filter(
+        (item) => item.Topic === selectedTopic
+      );
+      setFilteredData(filtered);
+    }
+    setShowTopics(false); // Hide dropdown after selection
+  };
+  const handleTopicChange = (selectedTopic) => {
+    handleTopicClick(selectedTopic);
+  };
   return (
     <Layout style={{ boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)" }}>
       <Navbar
@@ -227,7 +250,6 @@ const Dashboard = () => {
         onLogout={handleLogoutClick}
         onDashboard={handleNavigateToDashboard}
       />
-
       <h1
         style={{
           textAlign: "center",
@@ -240,6 +262,82 @@ const Dashboard = () => {
       >
         {quote}
       </h1>
+      <div
+        className="sort-by-container"
+        style={{
+          marginBottom: "20px",
+          textAlign: "left",
+          position: "relative",
+          marginLeft: "40px",
+        }}
+      >
+        <button
+          ref={buttonRef}
+          className="dropdown-button"
+          onClick={handleSortByClick}
+          style={{
+            backgroundColor: showTopics ? "#ECEFCA" : "#fff", // Highlights the button when clicked
+            border: "1px solid #94B4C1",
+            borderRadius: "5px",
+            padding: "10px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#213448",
+            marginLeft: "0px",
+            boxShadow: "0 2px 10px rgba(33,52,72,0.15)",
+            transition: "background-color 0.3s",
+          }}
+        >
+          Sort By
+        </button>
+        {/* Topics dropdown */}
+        {showTopics && (
+          <div
+            ref={dropdownRef}
+            className="topics-dropdown"
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)", // Places dropdown below button
+              left: 0,
+              zIndex: 100,
+              background: "#fff",
+              border: "1px solid #94B4C1",
+              borderRadius: "10px",
+              boxShadow: "0 4px 20px rgba(33,52,72,0.12)",
+              minWidth: "220px",
+              maxWidth: "340px",
+              padding: "10px 0",
+              textAlign: "left",
+            }}
+          >
+            <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {topics.map((topic) => (
+                <li
+                  key={topic}
+                  onClick={() => handleTopicChange(topic)}
+                  style={{
+                    padding: "8px 24px",
+                    cursor: "pointer",
+                    fontWeight: topic === topic ? "bold" : "normal",
+                    color: "#213448",
+                    borderBottom: "1px solid #ECEFCA",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#ECEFCA")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#fff")
+                  }
+                >
+                  {topic}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       <div style={tableContainerStyle}>
         <h2
@@ -253,7 +351,13 @@ const Dashboard = () => {
           DSA Questions
         </h2>
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", minWidth: "900px", borderCollapse: "collapse" }}>
+          <table
+            style={{
+              width: "100%",
+              minWidth: "900px",
+              borderCollapse: "collapse",
+            }}
+          >
             <thead>
               <tr style={{ background: "#213448" }}>
                 <th style={thStyle}>Topic</th>
@@ -268,11 +372,12 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {questions.map((q, index) => (
+              {(topic ? filteredData : sortedQuestions).map((q, index) => (
                 <tr
                   key={index}
                   style={{
-                    transition: "transform 0.2s ease, background-color 0.2s ease",
+                    transition:
+                      "transform 0.2s ease, background-color 0.2s ease",
                     cursor: "pointer",
                     color: "#213448",
                   }}
@@ -377,9 +482,6 @@ const Dashboard = () => {
     </Layout>
   );
 };
-
-// --- Styles ---
-
 const buttonStyle = {
   backgroundColor: "#547792", // Light Blue for buttons
   padding: "10px 20px",
@@ -391,7 +493,6 @@ const buttonStyle = {
   transition: "all 0.3s ease",
   boxShadow: "0 2px 10px rgba(84, 119, 146, 0.3)",
 };
-
 const inputStyle = {
   backgroundColor: "#213448", // Dark Blue background for inputs
   color: "#fff",
@@ -400,7 +501,6 @@ const inputStyle = {
   padding: "10px",
   outline: "none",
 };
-
 const tableContainerStyle = {
   background: "#ECEFCA", // Pale Yellow background for cleaner design
   padding: "30px",
@@ -410,7 +510,6 @@ const tableContainerStyle = {
   margin: "40px auto",
   maxWidth: "1200px",
 };
-
 const thStyle = {
   borderBottom: "2px solid #94B4C1", // Soft Blue for header borders
   padding: "12px",
@@ -418,14 +517,12 @@ const thStyle = {
   fontWeight: "600",
   background: "#213448", // Dark Blue header background
 };
-
 const tdStyle = {
   padding: "12px",
   color: "#213448", // Dark Blue for table text
   textAlign: "center",
   backgroundColor: "#ECEFCA", // Pale Yellow background for table rows
 };
-
 const actionBtnStyle1 = {
   marginRight: "10px",
   padding: "6px 12px",
@@ -436,7 +533,6 @@ const actionBtnStyle1 = {
   cursor: "pointer",
   transition: "0.3s ease",
 };
-
 const actionBtnStyle2 = {
   padding: "6px 12px",
   borderRadius: "6px",
@@ -446,5 +542,4 @@ const actionBtnStyle2 = {
   cursor: "pointer",
   transition: "0.3s ease",
 };
-
 export default Dashboard;

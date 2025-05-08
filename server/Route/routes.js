@@ -32,7 +32,8 @@ const {
   adminquestionadd,
   getAllAdminQuestions,
   adminquestiondelete,
-  adminquestionupdate
+  adminquestionupdate,
+  saveProblemHandlers
 } = require("../controllers/Question.controller"); // Import updateQuestion
 const {
   updateuserprofile,
@@ -48,6 +49,7 @@ const multer = require("multer");
 const { postcontroller , Feedcontroller } = require("../controllers/post.controller");
 
 const upload = require("../middleware/multer");
+const { submitSolution } = require("../controllers/Submit.controller");
 
 
 
@@ -91,11 +93,13 @@ router.get("/allgoogleusers", verifyToken, allgoogleusers);
 router.get("/allusers", verifyToken, allusers);
 router.get("/userpoints", verifyToken, userpointsview);
 router.post("/deleteuser", verifyToken, deleteuser);
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-otp", verifyotp);
+router.post("/forgotpass", forgotPassword);
+router.post("/verifyotp", verifyotp);
 router.post("/updatepassword", updateuserpassword);
 router.post("/logout", verifyToken, logoutUser);
 router.post("/auth/google", googleAuth);
+router.post("/submitcode", verifyToken, submitSolution);
+router.post("/questionhandler" , verifyToken, saveProblemHandlers);
 
 
 

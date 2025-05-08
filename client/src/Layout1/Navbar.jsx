@@ -5,7 +5,7 @@ import { handleLogout } from "../utils/Logout.js";
 import { createroom, joinroom } from "../Rooms/room.jsx";
 import { io } from "socket.io-client";
 import axios from "axios";
-import solvedproblemslist from '../screens/solvedproblemslist/solvedproblemslist';
+import solvedproblemslist from "../screens/solvedproblemslist/solvedproblemslist";
 const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const linkStyle = {
@@ -45,8 +45,8 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
   const isMobile = windowWidth <= 768;
   const navigate = useNavigate();
@@ -56,7 +56,10 @@ const Navbar = () => {
   useEffect(() => {
     const fetchUserPoints = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_USER_POINTS_VIEW, { withCredentials: true });
+        const response = await axios.get(
+          process.env.REACT_APP_USER_POINTS_VIEW,
+          { withCredentials: true }
+        );
         if (response.data && typeof response.data.points === "number") {
           setUserPoints(response.data.points);
         }
@@ -168,7 +171,9 @@ const Navbar = () => {
           alt="WeCode Logo"
           style={{ height: "40px" }}
         />
-        <span style={{ fontSize: "2rem", fontWeight: "bold", color: "#ECEFCA" }}>
+        <span
+          style={{ fontSize: "2rem", fontWeight: "bold", color: "#ECEFCA" }}
+        >
           WeCode
         </span>
       </div>
@@ -190,88 +195,121 @@ const Navbar = () => {
             ☰
           </button>
           {showMobileMenu && (
-  <div
-    style={{
-      position: "absolute",
-      top: "70px",
-      right: 0,
-      backgroundColor: "#213448",
-      borderRadius: "8px",
-      padding: "15px",
-      minWidth: "200px",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-      zIndex: 20,
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-    }}
-  >
-    <span style={{ color: "#ECEFCA", fontWeight: "bold", marginBottom: "5px" }}>
-      Points: {userPoints}
-    </span>
+            <div
+              style={{
+                position: "absolute",
+                top: "70px",
+                right: 0,
+                backgroundColor: "#213448",
+                borderRadius: "8px",
+                padding: "15px",
+                minWidth: "200px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                zIndex: 20,
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <span
+                style={{
+                  color: "#ECEFCA",
+                  fontWeight: "bold",
+                  marginBottom: "5px",
+                }}
+              >
+                Points: {userPoints}
+              </span>
 
-    {/* Show Create Room and Join Room only when on DSA Dashboard */}
-    {isDsaDashboard && (
-      <div style={{ display: "flex", gap: "10px", marginBottom: "5px" }}>
-        <button
-          onClick={handleCreateRoom}
-          style={{
-            flex: 1,
-            padding: "8px 0",
-            color: "#ECEFCA",
-            backgroundColor: "#547792",
-            border: "none",
-            borderRadius: "6px",
-            fontWeight: "500",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
-            transition: "all 0.3s ease",
-          }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = "#94B4C1")}
-          onMouseOut={(e) => (e.target.style.backgroundColor = "#547792")}
-        >
-          Create Room
-        </button>
-        <button
-          onClick={() => setShowJoinModal(true)}
-          style={{
-            flex: 1,
-            padding: "8px 0",
-            color: "#ECEFCA",
-            backgroundColor: "#547792",
-            border: "none",
-            borderRadius: "6px",
-            fontWeight: "500",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
-            transition: "all 0.3s ease",
-          }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = "#94B4C1")}
-          onMouseOut={(e) => (e.target.style.backgroundColor = "#547792")}
-        >
-          Join Room
-        </button>
-      </div>
-    )}
+              {/* Show Create Room and Join Room only when on DSA Dashboard */}
+              {isDsaDashboard && (
+                <div
+                  style={{ display: "flex", gap: "10px", marginBottom: "5px" }}
+                >
+                  <button
+                    onClick={handleCreateRoom}
+                    style={{
+                      flex: 1,
+                      padding: "8px 0",
+                      color: "#ECEFCA",
+                      backgroundColor: "#547792",
+                      border: "none",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.target.style.backgroundColor = "#94B4C1")
+                    }
+                    onMouseOut={(e) =>
+                      (e.target.style.backgroundColor = "#547792")
+                    }
+                  >
+                    Create Room
+                  </button>
+                  <button
+                    onClick={() => setShowJoinModal(true)}
+                    style={{
+                      flex: 1,
+                      padding: "8px 0",
+                      color: "#ECEFCA",
+                      backgroundColor: "#547792",
+                      border: "none",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.target.style.backgroundColor = "#94B4C1")
+                    }
+                    onMouseOut={(e) =>
+                      (e.target.style.backgroundColor = "#547792")
+                    }
+                  >
+                    Join Room
+                  </button>
+                </div>
+              )}
 
-    {/* Optimized Order for Buttons in Mobile Menu */}
-    <span style={linkStyle} onClick={handleNavigateTouser}>User Details</span>
-    <span style={linkStyle} onClick={handleNavigateToFollowDashboard}>Follow Dashboard</span>
-    <span style={linkStyle} onClick={handleNavigateToUploadPost}>Upload Post</span>
-    <span style={linkStyle} onClick={handleproblemsolved}>Problem Solved</span>
-
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={NavigateFeed}>Home</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={NavigateDsaCourses}>DSA Course</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={NavigatetoWebDev}>Web Dev Course</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={navigatetodevops}>DevOps Course</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={navigatetoabout}>About</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={NavigatetoWebDevprojects}>Web Dev</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={NavigatedDSADashboard}>DSA</span>
-    <span style={{ ...linkStyle, display: "block", marginBottom: "10px" }} onClick={navigatetodevopsprojects}>DevOps</span>
-
-    <span style={linkStyle} onClick={handleLogoutClick}>Logout</span>
-  </div>
-)}
+              {/* Optimized Order for Buttons in Mobile Menu */}
+              <div>
+                {[
+                  { text: "Home", onClick: NavigateFeed },
+                  { text: "User Details", onClick: handleNavigateTouser },
+                  { text: "About", onClick: navigatetoabout },
+                  {
+                    text: "Follow Dashboard",
+                    onClick: handleNavigateToFollowDashboard,
+                  },
+                  { text: "Upload Post", onClick: handleNavigateToUploadPost },
+                  { text: "Web Dev", onClick: NavigatetoWebDevprojects },
+                  { text: "DevOps", onClick: navigatetodevopsprojects },
+                  { text: "DSA", onClick: NavigatedDSADashboard },
+                  { text: "Problem Solved", onClick: handleproblemsolved },
+                  { text: "DSA Course", onClick: NavigateDsaCourses },
+                  { text: "Web Dev Course", onClick: NavigatetoWebDev },
+                  { text: "DevOps Course", onClick: navigatetodevops },
+                  { text: "Logout", onClick: handleLogoutClick },
+                ].map(({ text, onClick }, idx) => (
+                  <span
+                    key={idx}
+                    onClick={onClick}
+                    style={{
+                      ...linkStyle,
+                      display: "block",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    {text}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -318,8 +356,12 @@ const Navbar = () => {
                     textAlign: "left",
                     cursor: "pointer",
                   }}
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "#1a1a1a")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#1a1a1a")
+                  }
+                  onMouseOut={(e) =>
+                    (e.target.style.backgroundColor = "transparent")
+                  }
                 >
                   DSA Course
                 </button>
@@ -335,8 +377,12 @@ const Navbar = () => {
                     textAlign: "left",
                     cursor: "pointer",
                   }}
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "#1a1a1a")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#1a1a1a")
+                  }
+                  onMouseOut={(e) =>
+                    (e.target.style.backgroundColor = "transparent")
+                  }
                 >
                   Web Dev Course
                 </button>
@@ -352,8 +398,12 @@ const Navbar = () => {
                     textAlign: "left",
                     cursor: "pointer",
                   }}
-                  onMouseOver={(e) => (e.target.style.backgroundColor = "#1a1a1a")}
-                  onMouseOut={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseOver={(e) =>
+                    (e.target.style.backgroundColor = "#1a1a1a")
+                  }
+                  onMouseOut={(e) =>
+                    (e.target.style.backgroundColor = "transparent")
+                  }
                 >
                   DevOps Course
                 </button>
@@ -363,13 +413,21 @@ const Navbar = () => {
           <a href="#about" style={linkStyle} onClick={navigatetoabout}>
             About
           </a>
-          <a href="#webdev" style={linkStyle} onClick={NavigatetoWebDevprojects}>
+          <a
+            href="#webdev"
+            style={linkStyle}
+            onClick={NavigatetoWebDevprojects}
+          >
             Web Dev
           </a>
           <a href="#dsa" style={linkStyle} onClick={NavigatedDSADashboard}>
             DSA
           </a>
-          <a href="#devops" style={linkStyle} onClick={navigatetodevopsprojects}>
+          <a
+            href="#devops"
+            style={linkStyle}
+            onClick={navigatetodevopsprojects}
+          >
             DevOps
           </a>
         </div>
@@ -419,7 +477,13 @@ const Navbar = () => {
       {/* Only show Profile menu and points on desktop */}
       {!isMobile && (
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ color: "#ECEFCA", fontWeight: "bold", marginRight: "10px" }}>
+          <span
+            style={{
+              color: "#ECEFCA",
+              fontWeight: "bold",
+              marginRight: "10px",
+            }}
+          >
             Points: {userPoints}
           </span>
           <div style={{ position: "relative" }}>
@@ -632,7 +696,9 @@ const Navbar = () => {
                   boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
                   transition: "all 0.3s ease",
                 }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#94B4C1")}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#94B4C1")
+                }
                 onMouseOut={(e) => (e.target.style.backgroundColor = "#547792")}
               >
                 Join Room
@@ -650,7 +716,9 @@ const Navbar = () => {
                   boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)",
                   transition: "all 0.3s ease",
                 }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#94B4C1")}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#94B4C1")
+                }
                 onMouseOut={(e) => (e.target.style.backgroundColor = "#547792")}
               >
                 Cancel

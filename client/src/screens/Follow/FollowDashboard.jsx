@@ -140,8 +140,6 @@ const FollowDashboard = () => {
       setMessage(error.response?.data?.message || "Error following user");
     }
   };
-
-  // Handle unfollowing a user
   const handleUnfollow = async () => {
     try {
       const response = await axios.post(
@@ -160,8 +158,7 @@ const FollowDashboard = () => {
       setMessage(error.response?.data?.message || "Error unfollowing user");
     }
   };
-
-  const debouncedSearchUsers = useCallback(
+const debouncedSearchUsers = useCallback(
     debounce(async (query) => {
       try {
         const res = await axios.get(
@@ -177,8 +174,7 @@ const FollowDashboard = () => {
     }, 400),
     []
   );
-
-  useEffect(() => {
+useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setSearchResults([]);
@@ -193,6 +189,7 @@ const FollowDashboard = () => {
 
   return (
     <Layout>
+      <div className="container">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -200,7 +197,7 @@ const FollowDashboard = () => {
         style={{ padding: "2rem", backgroundColor: "#213448", color: "#ECEFCA", minHeight: "100vh", fontFamily: "sans-serif" }}
       >
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem", position: "relative" }}>
-          <div ref={dropdownRef} style={{ marginTop: "50px", position: "relative", width: "400px" }}>
+          <div ref={dropdownRef} style={{ marginTop: "50px", position: "relative", width: "90%", maxWidth: "400px" }}>
             {/* Glassmorphism search input with floating label and icon */}
             <div className="glassmorph-search-container">
               <span className="search-icon" role="img" aria-label="search">🔍</span>
@@ -323,6 +320,26 @@ const FollowDashboard = () => {
         {/* Glassmorphism and floating label styles */}
         <style>
         {`
+          @media (max-width: 600px) {
+            .glassmorph-search-container {
+              flex-direction: column;
+              align-items: stretch;
+            }
+
+            .search-icon {
+              margin-bottom: 0.5rem;
+            }
+
+            .glassmorph-search-input {
+              width: 100% !important;
+            }
+          }
+
+          .container {
+            padding: 1rem;
+            box-sizing: border-box;
+            overflow-x: hidden;
+          }
           .glassmorph-search-container {
             position: relative;
             width: 100%;
@@ -534,50 +551,7 @@ const FollowDashboard = () => {
                   >
                     {isFollowing ? "Unfollow" : "Follow"}
                   </button>
-                  <button
-                    style={{
-                      backgroundColor: "#547792",
-                      color: "#ECEFCA",
-                      padding: "0.5rem 1.1rem",
-                      borderRadius: "8px",
-                      border: "1px solid #94B4C1",
-                      cursor: "pointer",
-                      fontSize: "1rem",
-                      transition: "background-color 0.3s ease, color 0.3s ease"
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = "#94B4C1";
-                      e.currentTarget.style.color = "#213448";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = "#547792";
-                      e.currentTarget.style.color = "#ECEFCA";
-                    }}
-                  >
-                    Message
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#547792",
-                      color: "#ECEFCA",
-                      padding: "0.5rem",
-                      borderRadius: "8px",
-                      border: "1px solid #94B4C1",
-                      cursor: "pointer",
-                      fontSize: "1.1rem",
-                      transition: "background-color 0.3s ease, color 0.3s ease"
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = "#94B4C1";
-                      e.currentTarget.style.color = "#213448";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = "#547792";
-                      e.currentTarget.style.color = "#ECEFCA";
-                    }}
-                  >
-                    ⋯
-                  </button>
+                    
                 </div>
                 <div style={{ display: "flex", gap: "2rem", marginBottom: "1rem" }}>
                   <span><strong>{followerCount}</strong> followers</span>
@@ -588,6 +562,7 @@ const FollowDashboard = () => {
           </div>
         )}
       </motion.div>
+      </div>
     </Layout>
   );
 };
